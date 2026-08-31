@@ -1,0 +1,35 @@
+# --- dati di ingresso (~223 MB, si scaricano dal portale Codex) --------------
+data/
+
+# --- log dei run ------------------------------------------------------------
+logs/
+
+# --- appunti di lavoro ------------------------------------------------------
+docs/
+
+# --- output -----------------------------------------------------------------
+results/*
+!results/motif_distilled/
+!results/figures/
+
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# --- artefatti di compilazione LaTeX ----------------------------------------
+*.aux
+*.toc
+*.lof
+*.lot
+*.out
+*.log
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.bbl
+*.blg
+
+# --- residui ----------------------------------------------------------------
+*.bak
+*.tmp
