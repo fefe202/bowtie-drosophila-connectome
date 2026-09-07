@@ -14,6 +14,11 @@ effect di Sabrin & Dovrolis (2020), che e' una proprieta' globale della rete,
 lo misura hourglass_core.py. I nomi dei file e delle colonne conservano
 "hourglass" per continuita' con i risultati gia' prodotti.
 
+La propagazione del flow vector (next_counts = counts @ submat) riprende
+l'implementazione di D. Curcio, level-based-drosophila-motifs,
+computation/compute.py. L'estensione a SigmaPi per i pattern con diramazioni
+e' di questo lavoro.
+
 Uso:
     python src/hourglass_areas.py --window 1-2-3 --k_in 2 --k_out 2 \
         --max_jump 1 --min_count 10

@@ -541,6 +541,24 @@ this thesis does not re-derive it, but it does validate it independently in
 Section~\ref{sec:results-hierarchy}, where the functional composition of the
 levels is shown to follow the expected gradient.
 
+Because everything that follows is conditioned on these levels, it is worth
+stating how they were obtained. The assignment proceeds in two steps. A
+spectral embedding of the connectome first places every neuron on a
+continuous axis, so that neurons receiving from many others and projecting to
+few sit towards one end and the reverse towards the other; this yields a real
+number per neuron rather than a discrete label. A decision tree then
+discretises that axis into five bins, choosing the cut points so as to
+separate the functional super-classes as cleanly as possible. The levels are
+therefore not arbitrary quantiles: their boundaries are placed where the
+biological composition of the population changes.
+
+This has a consequence that matters for the next section. Since the cut
+points were chosen to separate super-classes, levels and super-classes are
+not independent, and pairing them is in one sense the natural thing to do.
+This thesis nevertheless groups neurons more finely, for reasons set out in
+Section~\ref{sec:groups} and tested empirically in
+Section~\ref{sec:results-granularity}.
+
 Once levels are available, every edge acquires a direction relative to the
 hierarchy. For an edge running from a neuron at level $y_u$ to a neuron at
 level $y_v$ we write
@@ -571,16 +589,62 @@ lobe projects to the mushroom body calyx, not that one particular neuron
 does.
 
 We therefore abstract from neurons to \emph{metanodes}. A metanode is a pair
-consisting of an anatomical group and a hierarchical level, so that for
-example the neurons of the mushroom body calyx sitting at level~2 form one
-metanode, and those of the same structure at level~3 form another. A motif
-is then a pattern over metanodes, and its count is the number of distinct
-neuron-level instantiations of that pattern. This preserves the quantity
-that actually matters, namely how many real circuits realise the pattern,
-while reducing the search space by several orders of magnitude. Depending on
-the level window under consideration, the abstraction yields between $879$
-and $1{,}220$ metanodes, a number small enough that an exhaustive search
-over combinations of them becomes conceivable.
+consisting of an anatomical category and a hierarchical level, so that the
+neurons of one structure sitting at level~2 form one metanode and those of
+the same structure at level~3 form another. A motif is then a pattern over
+metanodes, and its count is the number of distinct neuron-level
+instantiations of that pattern. This preserves the quantity that actually
+matters, namely how many real circuits realise the pattern, while reducing
+the search space by several orders of magnitude.
+
+Two anatomical categorisations are available in the dataset, and the choice
+between them is consequential enough to be stated explicitly. The first is
+the \emph{super-class}, a functional label taking nine values: \emph{optic},
+\emph{central}, \emph{sensory}, \emph{descending}, \emph{ascending},
+\emph{motor}, \emph{endocrine}, \emph{visual projection} and
+\emph{visual centrifugal}. The second is the \emph{anatomical group}, which
+records the neuropils in which a neuron arborises and takes $628$ distinct
+values: \code{ME} for a neuron confined to the medulla, \code{AL.MB\_CA}
+for one spanning the antennal lobe and the mushroom body calyx, and so on.
+
+Paired with the five levels, the two give metanode sets that differ by more
+than an order of magnitude: $24$ metanodes at super-class granularity against
+$879$ at group granularity on the shallow window, with median populations of
+$511$ and $3$ neurons respectively. Figure~\ref{fig:metagraph} shows both.
+
+This thesis uses the \emph{anatomical group}. The reason is that the question
+being asked is which \emph{structure} occupies the waist, and the super-class
+label cannot express an answer to it: the category \emph{central} alone
+collapses $521$ distinct anatomical groups into one node. The antennal lobe
+projection neurons, the Kenyon cells of the mushroom body and the mushroom
+body output neurons are all, without exception, \emph{central}; so is the
+lateral horn. Any statement about how information is routed within the
+central brain is therefore unavailable at that granularity, by construction
+rather than by accident.
+
+The cost of the finer choice is a long tail of very small metanodes, with a
+median of three neurons on the shallow window. The $\mathit{min\_count}$
+threshold of Section~\ref{sec:micro-methods} removes patterns supported by
+too few instances, but it does not prevent a category from being small to
+begin with, and this is a genuine limitation of the abstraction.
+Section~\ref{sec:results-granularity} repeats the entire analysis at
+super-class granularity and reports what each choice does and does not
+recover.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{metagraph.png}
+\caption[The metagraph at two granularities]{The metagraph on which motifs
+are counted. On the left, the graph at super-class granularity for window
+$\{1,2,3\}$: each node is a metanode, that is a (super-class, level) pair,
+placed by level on the horizontal axis and sized by the number of neurons it
+contains; the sixty strongest of its $293$ edges are drawn. On the right, the
+distribution of metanode populations under the two categorisations, with
+medians marked. The group-level metagraph has $879$ nodes and $42{,}867$
+edges and cannot be drawn legibly, which is itself an indication of the
+difference in resolution between the two.}
+\label{fig:metagraph}
+\end{figure}
 
 \subsection{Network Motifs}
 \label{sec:motifs}
@@ -783,6 +847,11 @@ falls out at the end. The vector being propagated is called the \emph{flow
 vector}, and its $i$-th entry has a direct interpretation as the number of
 partial matches of the pattern that terminate at neuron $i$.
 
+The propagation of the flow vector along a chain of groups follows the
+implementation of Curcio \cite{curcio2026}, from which this part of the code
+derives; the extension to branching patterns developed in
+Section~\ref{sec:sigmapi} is specific to the present work.
+
 The flow vector has a property that turns out to be decisive. Because the
 operation is linear, the count computed over a union of groups equals the
 sum of the counts computed over the individual groups. Counting the pattern
@@ -928,6 +997,34 @@ occurrences a pattern must have to be retained, which suppresses the long
 tail of patterns realised by only a handful of neurons. Unless stated
 otherwise, all results in this thesis use $\kin = \kout = 2$,
 $\mathit{max\_jump} = 1$ and $\mathit{min\_count} = 10$.
+
+The choice $\kin = \kout = 2$ deserves a word, since the framework imposes no
+such restriction. It is the smallest configuration that is genuinely a
+bow-tie: two inputs are the minimum needed for convergence and two outputs
+the minimum for divergence, whereas $\kin = \kout = 1$ describes a linear
+chain rather than a waist, and linear chains through this hierarchy have
+already been characterised in earlier work on the same dataset
+\cite{curcio2026}. Taking the smallest structure that expresses the
+architecture under study also keeps the count interpretable, since every
+pattern is then a statement about four edges rather than about an
+increasingly baroque configuration.
+
+The framework is nonetheless parametric in both values, and the search engine
+accepts any $\kin$ and $\kout$: configurations such as $(3,3)$ and $(3,2)$
+run without modification. What makes larger values impractical is cost rather
+than expressiveness. The number of group combinations per waist grows as
+$\binom{p}{\kin}\binom{q}{\kout}$, so a waist with fifty incoming and fifty
+outgoing groups goes from $1.5$ million combinations at $\kin=\kout=2$ to
+$384$ million at three, a factor of $256$; interpretation degrades in the
+same direction, since each pattern then constrains six edges rather than
+four.
+
+A genuine implementation limit applies only to the parameter sweep of
+Section~\ref{sec:results-sweep}, which avoids enumerating combinations by
+evaluating an elementary symmetric polynomial. That shortcut admits an exact
+disjointness correction only for the pure forms $(k,1)$ and $(1,k)$; the
+general case $(k,k)$ with $k \ge 3$ would require inclusion--exclusion to a
+depth this implementation does not reach.
 
 \subsubsection{Pruning}
 
@@ -1655,6 +1752,86 @@ convergence. A neuron population can therefore be large and still be a poor
 waist, which is a useful corrective to the intuition that the biggest
 structures must be the most important ones.
 
+\subsection{What the Choice of Granularity Recovers}
+\label{sec:results-granularity}
+
+Section~\ref{sec:groups} argued for grouping neurons by anatomical group
+rather than by functional super-class. Since that choice conditions every
+result in this chapter, and since the alternative is the one adopted in the
+related work of Section~\ref{sec:related}, the entire search was repeated at
+super-class granularity so that the two could be compared directly rather
+than argued about.
+
+\begin{table}[H]
+\centering
+\caption{The same search on window $\{1,2,3\}$ under the two
+categorisations.}
+\label{tab:granularity}
+\begin{tabular}{lrr}
+\toprule
+ & super-class & anatomical group \\
+\midrule
+categories                & 9 & 628 \\
+metanodes                 & 24 & 879 \\
+metagraph edges           & 293 & 42,867 \\
+median neurons / metanode & 511 & 3 \\
+motifs found              & 29,091 & 31,184,800 \\
+runtime                   & 6.4\,s & 14m39s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The first thing to report is what the coarse analysis does \emph{not} do,
+because it contradicts an argument that might be expected. One could suppose
+that super-class granularity is unusable because its metanodes are too large
+to be waists: the largest, \emph{optic} at level~2, contains $35{,}584$
+neurons, a quarter of the network. That supposition is wrong. The waist
+carrying the most mass in the coarse run is \emph{visual centrifugal} at
+level~2, a metanode of only $311$ neurons with an effective size of $3.9$.
+Narrow waists emerge perfectly well at coarse granularity, because what
+produces a high count is convergence and divergence structure, not
+population. The coarse analysis is also very cheap, finishing in six seconds
+and yielding twenty-nine thousand patterns rather than thirty-one million,
+which makes it far easier to inspect by hand.
+
+What the coarse analysis loses is anatomical resolution, and this is visible
+in the leading pattern of each run. At super-class granularity it reads
+\[
+[\text{central L1},\ \text{central L2}] \rightarrow
+\text{visual centrifugal L2} \rightarrow
+[\text{optic L1},\ \text{optic L2}],
+\]
+which says that central neurons converge on visual centrifugal neurons that
+project to optic ones. At group granularity the leading pattern reads
+\[
+[\code{ME\_L2},\ \code{ME.LO\_L2}] \rightarrow \code{LO\_L3} \rightarrow
+[\code{LO.LOP\_L2},\ \code{ME.LOP\_L2}],
+\]
+which names a circuit: two medulla populations converge on the lobula, which
+distributes to the lobula plate. The first statement is true and the second
+is more specific; whether the difference matters depends on the question
+being asked.
+
+For the questions asked in this thesis it matters decisively. The category
+\emph{central} contains $521$ distinct anatomical groups, and the antennal
+lobe projection neurons, the Kenyon cells, the mushroom body output neurons
+and the lateral horn all fall within it without exception. The sequence
+reported in Section~\ref{sec:results-sweep}, in which projection neurons
+broadcast onto Kenyon cells that then feed integrative output
+neurons, therefore has all three of its stages inside a single super-class
+node and cannot be observed at that granularity at all. The same applies to
+the compression results of Section~\ref{sec:results-compression}, which
+identify particular neuropils as bottlenecks, and to the recurrence result of
+Section~\ref{sec:optic-recurrence}, which separates re-entry into the lobula
+from relay through the lobula plate.
+
+The two granularities are therefore complementary rather than competing. The
+coarse one gives a cheap global picture and is directly comparable with
+earlier work on this connectome; the fine one is required for any claim about
+which structure does what. Reporting both, as this section does, costs six
+seconds of computation and removes the need to defend the choice in the
+abstract.
+
 \subsection{Waist Compression}
 \label{sec:results-compression}
 
@@ -2260,12 +2437,12 @@ that proposition concerns homomorphisms, whereas the requirement that
 participating neurons be distinct is a separate inclusion--exclusion layer;
 the two should be kept conceptually apart.
 
-The sweep over $\kin$ and $\kout$ covers only the pure forms. Shapes with
-both parameters at three or more would require inclusion--exclusion to a
-depth this implementation does not reach. The trichotomy of
-Section~\ref{sec:results-sweep} does not need them, since integrative and
-broadcast circuits are precisely the pure forms, but a complete map of the
-parameter plane would.
+The sweep over $\kin$ and $\kout$ covers only the pure forms, because the
+symmetric-polynomial shortcut it relies on admits an exact disjointness
+correction only for those. This is a limitation of the sweep and not of the
+search engine, which counts any configuration exactly; what limits the engine
+at larger $\kin$ and $\kout$ is the combinatorial growth of the number of
+group combinations, not correctness.
 
 The distillation fixes the selection criteria at search time, since the
 retained top-$N$ selections are chosen by occurrence count. An analysis

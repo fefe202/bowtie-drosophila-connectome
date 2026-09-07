@@ -4,7 +4,7 @@ Structural analysis of the adult *Drosophila melanogaster* connectome, asking wh
 
 The question is addressed at two independent scales. Locally, we exhaustively count bow-tie motifs in which `k_in` groups of neurons converge onto one *waist* group that projects onto `k_out` further groups. Globally, we compute the τ-core of the network and its hourglass score. Where the two agree the result is robust; where they disagree, the disagreement is itself informative.
 
-Master thesis, University of Calabria. The thesis source is in [`thesis/thesis.tex`](thesis/thesis.tex).
+Master thesis, University of Calabria. The thesis source is in Remove-Item -Recurse -Force .git[`thesis/thesis.tex`](thesis/thesis.tex).
 
 ---
 

@@ -65,15 +65,23 @@ def log(msg):
     print(f"  [{timestamp()}] {msg}", flush=True)
 
 
-def build_graph(NL_WINDOW, max_jump, conn_file, levels_file, neurons_file):
+def build_graph(NL_WINDOW, max_jump, conn_file, levels_file, neurons_file,
+                grouping="group", class_file=None):
     """Fasi 1-5: identiche a hourglass_areas.py."""
     df_conn = pd.read_csv(conn_file)
     df_levels = pd.read_csv(levels_file)
     df_neurons = pd.read_csv(neurons_file)
 
-    dn = df_neurons.dropna(subset=["group"])
-    dn = dn[dn["group"] != "NO_CONS"]
-    area_map = dn.set_index("root_id")["group"].to_dict()
+    if grouping == "superclass":
+        # Granularita' usata nei lavori di confronto: 9 superclassi funzionali
+        # invece dei 628 gruppi anatomici.
+        dc = pd.read_csv(class_file, usecols=["root_id", "super_class"])
+        dc = dc.dropna(subset=["super_class"])
+        area_map = dc.set_index("root_id")["super_class"].to_dict()
+    else:
+        dn = df_neurons.dropna(subset=["group"])
+        dn = dn[dn["group"] != "NO_CONS"]
+        area_map = dn.set_index("root_id")["group"].to_dict()
     level_map = df_levels.set_index("root_id")["y_level"].to_dict()
     target = set(NL_WINDOW)
     valid = sorted(n for n in (set(area_map) & set(level_map))
@@ -110,7 +118,8 @@ def build_graph(NL_WINDOW, max_jump, conn_file, levels_file, neurons_file):
 
 def run(NL_WINDOW, out_folder, k_in, k_out, max_jump, min_count,
         conn_file, levels_file, neurons_file, engine="matrix", limit=0,
-        budget=MATRIX_BUDGET, gz=False, full_csv=False):
+        budget=MATRIX_BUDGET, gz=False, full_csv=False,
+        grouping="group", class_file=None):
     t0 = time.time()
     os.makedirs(out_folder, exist_ok=True)
     print("=" * 74)
@@ -120,7 +129,8 @@ def run(NL_WINDOW, out_folder, k_in, k_out, max_jump, min_count,
         f"max_jump={max_jump}, min_count={min_count}")
 
     groups, group_keys, submat, incoming, outgoing, n_tot, n_edges = \
-        build_graph(NL_WINDOW, max_jump, conn_file, levels_file, neurons_file)
+        build_graph(NL_WINDOW, max_jump, conn_file, levels_file, neurons_file,
+                    grouping, class_file)
     log(f"{n_tot:,} neuroni, {n_edges:,} archi, {len(group_keys)} metanodi, "
         f"{len(submat):,} archi del metagrafo")
 
@@ -462,6 +472,11 @@ def main():
     ap.add_argument("--min_count", type=int, default=10)
     ap.add_argument("--engine", choices=["matrix", "loop", "sparse"],
                     default="matrix")
+    ap.add_argument("--grouping", choices=["group", "superclass"],
+                    default="group",
+                    help="granularita' dei metanodi: gruppo anatomico "
+                         "(628 categorie) o superclasse funzionale (9)")
+    ap.add_argument("--class_file", default=data("classification.csv"))
     ap.add_argument("--full_csv", action="store_true",
                     help="Scrive anche il CSV riga-per-riga. Di default NON "
                          "viene scritto: sono decine di GB che nessuna analisi "
@@ -518,7 +533,8 @@ def main():
     out = os.path.join(a.outdir, a.window)
     run(NL, out, a.k_in, a.k_out, a.max_jump, a.min_count,
         a.conn_file, a.levels_file, a.neurons_file, a.engine, a.limit,
-        a.budget_mb * 1024 * 1024, a.gzip, a.full_csv)
+        a.budget_mb * 1024 * 1024, a.gzip, a.full_csv,
+        a.grouping, a.class_file)
 
 
 if __name__ == "__main__":
