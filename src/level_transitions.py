@@ -148,8 +148,8 @@ def main():
         print(v.to_string(index=False))
         def direz(r):
             a_, b_, c_ = (r.livello_fan_in, r.livello_waist, r.livello_fan_out)
-            d1 = "FF" if a_ < b_ else ("FB" if a_ > b_ else "lat")
-            d2 = "FF" if b_ < c_ else ("FB" if b_ > c_ else "lat")
+            d1 = "FWD" if a_ < b_ else ("BWD" if a_ > b_ else "LAT")
+            d2 = "FWD" if b_ < c_ else ("BWD" if b_ > c_ else "LAT")
             return f"{d1}->{d2}"
         dch["direzione"] = dch.apply(direz, axis=1)
         g = dch.groupby("direzione")["massa"].sum().sort_values(ascending=False)
@@ -231,8 +231,8 @@ def main():
     print("\n  [SINTESI PER DIREZIONE DELLA CATENA]")
     def direz(r):
         a_, b_, c_ = r.livello_fan_in, r.livello_waist, r.livello_fan_out
-        d1 = "FF" if a_ < b_ else ("FB" if a_ > b_ else "lat")
-        d2 = "FF" if b_ < c_ else ("FB" if b_ > c_ else "lat")
+        d1 = "FWD" if a_ < b_ else ("BWD" if a_ > b_ else "LAT")
+        d2 = "FWD" if b_ < c_ else ("BWD" if b_ > c_ else "LAT")
         return f"{d1}->{d2}"
     dch["direzione"] = dch.apply(direz, axis=1)
     g = dch.groupby("direzione")["massa"].sum().sort_values(ascending=False)

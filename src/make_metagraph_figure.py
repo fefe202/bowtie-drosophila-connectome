@@ -52,10 +52,14 @@ def build(levels_file, class_file, neurons_file, conn_file, window, max_jump):
 
     lev = dict(zip(d["root_id"], d["y_level"]))
     cls = dict(zip(d["root_id"], d["super_class"]))
+    grp = dict(zip(d["root_id"], d["group"]))
     conn = pd.read_csv(conn_file, usecols=["pre_root_id", "post_root_id"])
     conn = conn[conn["pre_root_id"].isin(lev) & conn["post_root_id"].isin(lev)]
 
+    # Gli archi si contano alla stessa maniera per le due granularita': salti
+    # entro max_jump livelli e nessun cappio del metanodo su se stesso.
     edges = defaultdict(int)
+    gedges = set()
     for a, b in zip(conn["pre_root_id"].to_numpy(), conn["post_root_id"].to_numpy()):
         la, lb = lev[a], lev[b]
         if abs(la - lb) > max_jump:
@@ -63,7 +67,10 @@ def build(levels_file, class_file, neurons_file, conn_file, window, max_jump):
         s, t = (cls[a], la), (cls[b], lb)
         if s != t:
             edges[(s, t)] += 1
-    return sc, gr, edges
+        gs, gt = (grp[a], la), (grp[b], lb)
+        if gs != gt:
+            gedges.add((gs, gt))
+    return sc, gr, edges, len(gedges)
 
 
 def main():
@@ -79,8 +86,9 @@ def main():
     a = ap.parse_args()
     window = [int(x) for x in a.window.split("-")]
 
-    sc, gr, edges = build(a.levels_file, a.class_file, a.neurons_file,
-                          a.conn_file, window, a.max_jump)
+    sc, gr, edges, n_gedges = build(a.levels_file, a.class_file,
+                                    a.neurons_file, a.conn_file, window,
+                                    a.max_jump)
 
     fig, (axL, axR) = plt.subplots(1, 2, figsize=(12.4, 5.4),
                                    gridspec_kw={"width_ratios": [1.45, 1]})
@@ -151,7 +159,8 @@ def main():
     print(f"  metanodi: super-class {len(sc)}, gruppo anatomico {len(gr)}")
     print(f"  mediana neuroni: super-class {int(np.median(sc.values))}, "
           f"gruppo {int(np.median(gr.values))}")
-    print(f"  archi del metagrafo (superclassi): {len(edges)}")
+    print(f"  archi del metagrafo: superclassi {len(edges)}, "
+          f"gruppo anatomico {n_gedges}")
 
 
 if __name__ == "__main__":

@@ -216,14 +216,15 @@ contradictory.
 \hspace{2.5cm}\= \kill
 \textbf{AL}      \> Antennal Lobe, the first olfactory processing centre \\
 \textbf{BLAS}    \> Basic Linear Algebra Subprograms \\
+\textbf{BWD}     \> Backward, an edge running from a deeper to a shallower level \\
 \textbf{E/I}     \> Excitatory / Inhibitory \\
 \textbf{EB}      \> Ellipsoid Body \\
 \textbf{EM}      \> Electron Microscopy \\
-\textbf{FB}      \> Feedback, an edge running from a deeper to a shallower level \\
+\textbf{FB}      \> Fan-shaped Body, a neuropil of the central complex \\
 \textbf{FDR}     \> False Discovery Rate \\
-\textbf{FF}      \> Feed-forward, an edge running from a shallower to a deeper level \\
+\textbf{FWD}     \> Forward, an edge running from a shallower to a deeper level \\
 \textbf{GNG}     \> Gnathal Ganglia \\
-\textbf{lat}     \> Lateral, an edge between neurons of the same level \\
+\textbf{LAT}     \> Lateral, an edge between neurons of the same level \\
 \textbf{LH}      \> Lateral Horn \\
 \textbf{LO}      \> Lobula, a visual processing neuropil \\
 \textbf{LOP}     \> Lobula Plate \\
@@ -566,16 +567,170 @@ level $y_v$ we write
   \label{eq:edge-direction}
   \mathrm{dir}(u,v) =
   \begin{cases}
-    \mathrm{FF}  & \text{if } y_u < y_v \quad \text{(feed-forward)},\\
-    \mathrm{FB}  & \text{if } y_u > y_v \quad \text{(feedback)},\\
-    \mathrm{lat} & \text{if } y_u = y_v \quad \text{(lateral)}.
+    \mathrm{FWD} & \text{if } y_u < y_v \quad \text{(forward)},\\
+    \mathrm{BWD} & \text{if } y_u > y_v \quad \text{(backward)},\\
+    \mathrm{LAT} & \text{if } y_u = y_v \quad \text{(lateral)}.
   \end{cases}
 \end{equation}
-A feed-forward edge carries information deeper into the hierarchy, a
-feedback edge returns it towards the periphery, and a lateral edge moves it
-sideways within a single processing stage. This three-way classification is
-used throughout the thesis and underlies the finer signature scheme
-introduced in Section~\ref{sec:motifs}.
+A forward edge carries information deeper into the hierarchy, a backward
+edge returns it towards the periphery, and a lateral edge moves it sideways
+within a single processing stage. This three-way classification is used
+throughout the thesis and underlies the finer signature scheme introduced in
+Section~\ref{sec:motifs}.
+
+A remark on notation is needed here, because the natural abbreviations are
+not available. The two directions would ordinarily be written FF for
+feed-forward and FB for feedback, and this is how they appear in much of the
+network-motif literature. In this connectome the second of those collides
+with an anatomical name: \code{FB} is the standard abbreviation of the
+fan-shaped body, a neuropil of the central complex, and it occurs in nineteen
+of the anatomical groups set out in Section~\ref{sec:nomenclature}; it also
+appears in this thesis, in Table~\ref{tab:within-null}, as an area rather
+than as a direction. A reader who meets \code{BWD->FWD} without the glossary at
+hand has no way of telling which of the two is meant. The directions are
+therefore written \code{FWD}, \code{BWD} and \code{LAT} throughout, which
+collide with nothing, and the anatomical abbreviations keep their usual
+meaning.
+
+\subsubsection{The Anatomical Nomenclature}
+\label{sec:nomenclature}
+
+Every result in this thesis names anatomical structures by abbreviation, and
+those abbreviations are not arbitrary labels: they follow a system that is
+worth setting out before any of them appears in a figure, since a reader who
+does not know it cannot interpret a single pattern.
+
+The insect brain is divided into \emph{neuropils}, dense regions of
+synaptic connections separated by tracts of fibres, and the standard
+nomenclature of Ito et al.\ \cite{ito2014} assigns each one a short
+uppercase code. FlyWire annotates every neuron with the set of neuropils in
+which it arborises, and this annotation is the \code{group} field of the
+dataset. The field has $628$ distinct values, which sounds unmanageable
+until one sees how they are built. There are only $44$ distinct neuropils in
+the annotation, and a group is either a single neuropil, of which there are
+$44$, or a pair of neuropils written with a dot between them, of which there
+are $584$. No group names more than two. So \code{ME} is a neuron confined to
+the medulla, \code{LO} one confined to the lobula, and \code{ME.LO} a neuron
+that arborises in both and therefore connects them; \code{AL.MB\_CA} spans
+the antennal lobe and the mushroom body calyx, which is the anatomical
+signature of an olfactory projection neuron. Reading a group name is thus a
+matter of reading at most two codes, and the dot should be understood as
+``and'', not as a hierarchy.
+
+The $44$ neuropils are themselves organised into thirteen \emph{super-regions}
+in the same nomenclature, and this grouping is the macro-level of the
+anatomy. The medulla, lobula, lobula plate, lamina and accessory medulla make
+up the optic lobe; the fan-shaped body, ellipsoid body, protocerebral bridge
+and noduli make up the central complex; the calyx, pedunculus and the two
+lobes make up the mushroom body; and so on through the superior, inferior,
+ventrolateral, ventromedial and periesophageal neuropils. Table~\ref{tab:neuropils}
+gives the complete list with the population of each, grouped by super-region.
+The super-regions matter here for two reasons: they let a reader place an
+unfamiliar code without consulting an atlas, and they define a third
+granularity, intermediate between the nine functional super-classes and the
+$628$ groups, which Section~\ref{sec:results-granularity} uses as a control.
+
+\begin{table}[H]
+\centering
+\caption[The 44 neuropils of the annotation]{The $44$ neuropils that compose
+the \code{group} annotation, grouped by super-region and ordered by
+population within each. The counts divide a neuron between the two neuropils
+of a composite group, so they sum to the $134{,}181$ neurons that carry both
+a group and a level. Any group name in this thesis is one of these codes or
+two of them joined by a dot.}
+\label{tab:neuropils}
+\scriptsize
+\begin{minipage}[t]{0.49\textwidth}
+\vspace{0pt}
+\centering
+\begin{tabular}{llr}
+\toprule
+Code & Name & Neurons \\
+\midrule
+\multicolumn{3}{l}{\textit{Optic Lobe}} \\
+\code{ME} & Medulla & 55{,}811 \\
+\code{LO} & Lobula & 18{,}231 \\
+\code{LOP} & Lobula Plate & 8{,}669 \\
+\code{LA} & Lamina & 7{,}157 \\
+\code{AME} & Accessory Medulla & 36 \\
+\midrule
+\multicolumn{3}{l}{\textit{Ocellar Ganglion}} \\
+\code{OCG} & Ocellar Ganglion & 274 \\
+\midrule
+\multicolumn{3}{l}{\textit{Antennal Lobe}} \\
+\code{AL} & Antennal Lobe & 3{,}048 \\
+\midrule
+\multicolumn{3}{l}{\textit{Lateral Horn}} \\
+\code{LH} & Lateral Horn & 2{,}121 \\
+\midrule
+\multicolumn{3}{l}{\textit{Mushroom Body}} \\
+\code{MB\_CA} & Mushroom Body Calyx & 2{,}440 \\
+\code{MB\_ML} & Mushroom Body Medial Lobe & 2{,}002 \\
+\code{MB\_VL} & Mushroom Body Vertical Lobe & 484 \\
+\code{MB\_PED} & Mushroom Body Pedunculus & 246 \\
+\midrule
+\multicolumn{3}{l}{\textit{Central Complex}} \\
+\code{FB} & Fan-shaped Body & 1{,}728 \\
+\code{EB} & Ellipsoid Body & 382 \\
+\code{NO} & Noduli & 376 \\
+\code{PB} & Protocerebral Bridge & 108 \\
+\midrule
+\multicolumn{3}{l}{\textit{Lateral Complex}} \\
+\code{LAL} & Lateral Accessory Lobe & 981 \\
+\code{BU} & Bulb & 31 \\
+\code{GA} & Gall & 12 \\
+\midrule
+\bottomrule
+\end{tabular}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\textwidth}
+\vspace{0pt}
+\centering
+\begin{tabular}{llr}
+\toprule
+Code & Name & Neurons \\
+\multicolumn{3}{l}{\textit{Superior Neuropils}} \\
+\code{SMP} & Superior Medial Protocerebrum & 3{,}458 \\
+\code{SLP} & Superior Lateral Protocerebrum & 3{,}150 \\
+\code{SIP} & Superior Intermediate Protocerebrum & 443 \\
+\midrule
+\multicolumn{3}{l}{\textit{Inferior Neuropils}} \\
+\code{ICL} & Inferior Clamp & 980 \\
+\code{CRE} & Crepine & 920 \\
+\code{SCL} & Superior Clamp & 408 \\
+\code{IB} & Inferior Bridge & 268 \\
+\code{ATL} & Antler & 65 \\
+\midrule
+\multicolumn{3}{l}{\textit{Ventrolateral Neuropils}} \\
+\code{AVLP} & Anterior Ventrolateral Protocerebrum & 3{,}682 \\
+\code{PLP} & Posterior Lateral Protocerebrum & 2{,}274 \\
+\code{PVLP} & Posterior Ventrolateral Protocerebrum & 1{,}607 \\
+\code{AOTU} & Anterior Optic Tubercle & 926 \\
+\code{WED} & Wedge & 408 \\
+\midrule
+\multicolumn{3}{l}{\textit{Ventromedial Neuropils}} \\
+\code{IPS} & Inferior Posterior Slope & 1{,}604 \\
+\code{SPS} & Superior Posterior Slope & 1{,}534 \\
+\code{VES} & Vest & 432 \\
+\code{GOR} & Gorget & 70 \\
+\code{EPA} & Epaulette & 10 \\
+\midrule
+\multicolumn{3}{l}{\textit{Periesophageal Neuropils}} \\
+\code{SAD} & Saddle & 968 \\
+\code{PRW} & Prow & 593 \\
+\code{AMMC} & Antennal Mechanosensory and Motor Centre & 513 \\
+\code{FLA} & Flange & 334 \\
+\code{CAN} & Cantle & 8 \\
+\midrule
+\multicolumn{3}{l}{\textit{Gnathal Ganglia}} \\
+\code{GNG} & Gnathal Ganglia & 5{,}379 \\
+\midrule
+\multicolumn{3}{l}{\textit{Unassigned}} \\
+\code{UNASGD} & Unassigned & 10 \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\end{table}
 
 \subsubsection{Group-Level Abstraction}
 \label{sec:groups}
@@ -597,20 +752,24 @@ instantiations of that pattern. This preserves the quantity that actually
 matters, namely how many real circuits realise the pattern, while reducing
 the search space by several orders of magnitude.
 
-Two anatomical categorisations are available in the dataset, and the choice
-between them is consequential enough to be stated explicitly. The first is
-the \emph{super-class}, a functional label taking nine values: \emph{optic},
-\emph{central}, \emph{sensory}, \emph{descending}, \emph{ascending},
-\emph{motor}, \emph{endocrine}, \emph{visual projection} and
-\emph{visual centrifugal}. The second is the \emph{anatomical group}, which
-records the neuropils in which a neuron arborises and takes $628$ distinct
-values: \code{ME} for a neuron confined to the medulla, \code{AL.MB\_CA}
-for one spanning the antennal lobe and the mushroom body calyx, and so on.
+Which categorisation to use is a real choice, and three are available. The
+coarsest is the \emph{super-class}, a functional label carried by the FlyWire
+classification and taking nine values: \emph{optic}, \emph{central},
+\emph{sensory}, \emph{descending}, \emph{ascending}, \emph{motor},
+\emph{endocrine}, \emph{visual projection} and \emph{visual centrifugal}. The
+finest is the \emph{anatomical group} of Section~\ref{sec:nomenclature},
+which takes $628$ values. Between them sits the \emph{super-region}, obtained
+by replacing each neuropil of a group with the super-region that contains it,
+so that \code{ME.LO} becomes \code{OL}, both of its neuropils lying in the
+optic lobe, while \code{LO.PLP} becomes \code{OL.VLNP}, its two neuropils
+lying in different super-regions; this yields $79$ values.
 
-Paired with the five levels, the two give metanode sets that differ by more
-than an order of magnitude: $24$ metanodes at super-class granularity against
-$879$ at group granularity on the shallow window, with median populations of
-$511$ and $3$ neurons respectively. Figure~\ref{fig:metagraph} shows both.
+Paired with the five levels, the three give metanode sets that differ by
+almost two orders of magnitude. On the shallow window they give $24$, $188$
+and $879$ metanodes respectively, with median populations of $511$, $11$ and
+$3$ neurons and metagraphs of $293$, $6{,}295$ and $24{,}914$ edges.
+Figure~\ref{fig:metagraph} shows the coarsest graph in full and the
+distribution of metanode sizes.
 
 This thesis uses the \emph{anatomical group}. The reason is that the question
 being asked is which \emph{structure} occupies the waist, and the super-class
@@ -622,14 +781,22 @@ lateral horn. Any statement about how information is routed within the
 central brain is therefore unavailable at that granularity, by construction
 rather than by accident.
 
-The cost of the finer choice is a long tail of very small metanodes, with a
-median of three neurons on the shallow window. The $\mathit{min\_count}$
-threshold of Section~\ref{sec:micro-methods} removes patterns supported by
-too few instances, but it does not prevent a category from being small to
-begin with, and this is a genuine limitation of the abstraction.
-Section~\ref{sec:results-granularity} repeats the entire analysis at
-super-class granularity and reports what each choice does and does not
-recover.
+The cost of the finer choice is a long tail of very small categories. The
+median group holds eight neurons across the whole connectome and the median
+metanode three on the shallow window, and $344$ of the $628$ groups hold
+fewer than ten neurons each. Stated that way the abstraction sounds far too
+specific to support any general claim, which is why it is worth stating the
+other half of the same distribution: those $344$ small groups together
+account for $0.8\%$ of the neurons, and $99.2\%$ of the population lives in
+groups of ten neurons or more. The median is low because the tail is long,
+not because the analysis rests on tiny categories. The
+$\mathit{min\_count}$ threshold of Section~\ref{sec:micro-methods} then
+removes any pattern supported by fewer than ten instances, so the small
+categories that do exist are also the ones least likely to survive into a
+reported result. What remains a genuine limitation is that no threshold can
+make a category informative if it was small to begin with, and
+Section~\ref{sec:results-granularity} repeats the entire analysis at both of
+the coarser granularities in order to measure what that costs.
 
 \begin{figure}[H]
 \centering
@@ -640,7 +807,7 @@ $\{1,2,3\}$: each node is a metanode, that is a (super-class, level) pair,
 placed by level on the horizontal axis and sized by the number of neurons it
 contains; the sixty strongest of its $293$ edges are drawn. On the right, the
 distribution of metanode populations under the two categorisations, with
-medians marked. The group-level metagraph has $879$ nodes and $42{,}867$
+medians marked. The group-level metagraph has $879$ nodes and $24{,}914$
 edges and cannot be drawn legibly, which is itself an indication of the
 difference in resolution between the two.}
 \label{fig:metagraph}
@@ -671,22 +838,22 @@ input groups and two output groups has four edges, two entering the waist
 and two leaving it. Rather than labelling the motif by all four edges
 individually, which would produce an unwieldy number of categories, we
 classify each \emph{branch} by whether its edges agree with one another. If
-both edges entering the waist are feed-forward, the input branch is labelled
-FF; if they disagree, it is labelled \emph{mix}. The same applies to the
+both edges entering the waist are forward, the input branch is labelled
+\code{FWD}; if they disagree, it is labelled \emph{mix}. The same applies to the
 output branch. The resulting label is written
 \begin{equation}
   \label{eq:signature}
   \mathrm{signature} = \mathrm{sig}_{\mathrm{in}} \rightarrow
                        \mathrm{sig}_{\mathrm{out}},
   \qquad
-  \mathrm{sig} \in \{\mathrm{FF},\mathrm{FB},\mathrm{lat},\mathrm{mix}\},
+  \mathrm{sig} \in \{\mathrm{FWD},\mathrm{BWD},\mathrm{LAT},\mathrm{mix}\},
 \end{equation}
 which yields sixteen possible signatures. A motif labelled
-\code{FF->lat}, for instance, is one in which two groups feed forward onto a
+\code{FWD->LAT}, for instance, is one in which two groups feed forward onto a
 waist that then distributes laterally within its own level.
 
 A coarser classification was used in earlier work on this dataset. It labels
-a motif \emph{pure\_FF}, \emph{pure\_FB} or \emph{pure\_lateral} when all
+a motif \emph{pure\_FWD}, \emph{pure\_BWD} or \emph{pure\_LAT} when all
 four of its edges agree, and \emph{mixed} otherwise. As
 Section~\ref{sec:results-signature} shows quantitatively, this coarse label
 turns out to be close to vacuous: with four edges, complete agreement is
@@ -1027,6 +1194,7 @@ general case $(k,k)$ with $k \ge 3$ would require inclusion--exclusion to a
 depth this implementation does not reach.
 
 \subsubsection{Pruning}
+\label{sec:pruning}
 
 Three constraints reduce the search space, and it is important that none of
 them affects exactness: each removes only combinations that provably
@@ -1374,6 +1542,135 @@ substantial fraction of the connectome, which is why
 Section~\ref{sec:results-macro} reports both schemes rather than choosing
 one.
 
+\subsection{Do the Levels Survive the Change of Granularity?}
+\label{sec:results-coherence}
+
+The hierarchy of Section~\ref{sec:levels} was built in two steps, and the
+second of them deserves scrutiny before the levels are used any further. A
+spectral embedding placed every neuron on a continuous axis, and a decision
+tree then cut that axis into five bins, choosing the cut points so as to
+separate the functional super-classes as cleanly as possible. The levels are
+therefore calibrated against the super-class, whereas everything in this
+thesis pairs them with the anatomical group instead. Nothing guarantees in
+advance that a construction tuned for one categorisation remains meaningful
+under another, and the question has to be settled with a measurement rather
+than an assurance.
+
+The measurement is simple to state. For each category one takes the
+distribution of its neurons across the five levels and asks how concentrated
+it is. Three quantities summarise this: the \emph{purity}, which is the share
+of the category's neurons falling in its most populated level; the
+\emph{normalised mutual information} between category and level, which is
+the amount the category tells us about the level divided by the total
+uncertainty of the level and is therefore comparable across categorisations
+of different sizes; and the \emph{contiguity}, which asks whether the levels
+a category actually occupies form a consecutive run rather than a scattering.
+Each is compared against a reference in which the level labels are shuffled
+at random between neurons, preserving both the sizes of the categories and
+the overall distribution of levels and destroying only the association
+between the two.
+
+The first thing the measurement shows is that the concern is well founded as
+stated. Anatomical groups are not confined to a single level: their mean
+purity, weighted by population, is $0.563$, and only $179$ of the $628$
+groups live entirely on one level. The lobula plate is a clear case, with
+$647$ of its neurons at level~2, $1{,}077$ at level~3 and $157$ at level~4;
+the lobula is more dispersed still, with a modal share of only $0.452$.
+Whatever else is true, it is not true that a group determines a level.
+
+\begin{table}[H]
+\centering
+\caption{Coherence between anatomical category and hierarchical level, at
+the three granularities. Purity is the share of a category's neurons in its
+modal level, averaged with weights proportional to category size; NMI is
+$I(\text{category};\text{level})/H(\text{level})$. The random column shuffles
+the level labels between neurons, preserving category sizes and the level
+distribution.}
+\label{tab:coherence}
+\begin{tabular}{lrrrrr}
+\toprule
+Granularity & Categories & Purity & Random & NMI & Random \\
+\midrule
+super-class      & 9   & 0.413 & 0.351 & 0.144 & 0.000 \\
+super-region     & 79  & 0.461 & 0.352 & 0.190 & 0.001 \\
+anatomical group & 628 & 0.563 & 0.356 & 0.301 & 0.006 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The second thing it shows is that the implication does not follow, and it
+does not follow for three separate reasons.
+
+The first is that a metanode is a \emph{pair}, not a group. The unit over
+which motifs are counted is (group, level), so \code{LOP\_L2},
+\code{LOP\_L3} and \code{LOP\_L4} are three different nodes of the metagraph
+and are never merged. Dispersion of a group across levels is therefore not
+an error the abstraction has to absorb: it is the reason the abstraction
+carries the level at all. Were every group confined to one level, the level
+would be a deterministic function of the group and would add nothing
+whatever; the pairing is informative precisely to the extent that groups are
+spread. The measured dispersion is what makes the second coordinate worth
+having.
+
+The second is that the dispersion is structured rather than diffuse. Of the
+$628$ groups, $570$ occupy a consecutive run of levels once levels holding
+less than five per cent of the group are discarded, and those $570$ groups
+contain $99.4\%$ of all neurons. A group does not scatter over the hierarchy;
+it occupies a band of adjacent depths. The lobula plate again illustrates the
+pattern, sitting almost entirely on levels~2 and~3 with a thin extension into
+level~4, which is what one would expect of a structure that receives from one
+stage and projects to the next rather than one whose level assignment is
+noise.
+
+The third is the comparison that settles the original question. If the
+layering were an artefact of having been calibrated on super-classes, it
+should align with super-classes better than with anything else. It does the
+opposite. The weighted purity of the super-class is $0.413$, below the
+$0.563$ of the anatomical group, and the normalised mutual information tells
+the same story more sharply: $0.144$ for the super-class against $0.301$ for
+the group, with the super-region falling between them at $0.190$. Knowing a
+neuron's anatomical group removes more than twice as much uncertainty about
+its level as knowing its functional super-class does. Table~\ref{tab:coherence}
+collects the figures and Figure~\ref{fig:level-coherence} displays them.
+
+The reason is not mysterious. The decision tree was trained to separate
+super-classes, but it could only separate them as well as the underlying
+spectral axis allowed, and that axis is a statement about connectivity: a
+neuron sits early on it if it receives from few and projects to many, late if
+the reverse. Anatomical groups track connectivity closely, since a neuropil
+is defined by where its neurons make synapses, whereas a super-class such as
+\emph{central} contains structures at every depth of the brain and cannot
+track it at all. The layering is therefore not merely transferable from
+super-classes to groups; groups are the categorisation on which it is
+sharpest.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{level_coherence.png}
+\caption[Coherence between anatomical group and level]{How anatomical
+categories distribute over the hierarchical levels. On the left, the level
+profile of the twenty largest anatomical groups, each row normalised to its
+own population: the mass of a group concentrates on adjacent levels rather
+than spreading uniformly, and the lobula plate is visible as a structure
+straddling levels~2 and~3. In the centre, the distribution of purity over all
+$628$ groups weighted by population, against the value obtained when levels
+are assigned at random. On the right, the normalised mutual information
+between category and level at the three granularities: the finer the
+categorisation, the more the level is determined, which is the opposite of
+what one would expect if the layering were an artefact of the super-class
+labels it was calibrated on.}
+\label{fig:level-coherence}
+\end{figure}
+
+One caveat should be recorded. All three quantities are computed on the
+levels as given, and none of them validates the level construction itself;
+they establish only that the construction is at least as compatible with the
+anatomical group as with the categorisation used to build it. A genuinely
+independent check on the hierarchy comes from a different direction, in
+Section~\ref{sec:results-hierarchy}, where the functional composition of the
+levels is shown to follow the expected sensory-to-motor gradient without that
+gradient having been imposed.
+
 \subsection{The Macro-Scale Hourglass}
 \label{sec:results-macro}
 
@@ -1539,9 +1836,9 @@ any loss of exactness.
 
 The coarse four-way classification turns out to be nearly vacuous. On the
 shallow window, \emph{mixed} accounts for $29{,}453{,}022$ patterns, which
-is $94.4\%$ of the total, while \emph{pure\_lateral} accounts for
-$1{,}651{,}892$ ($5.3\%$), \emph{pure\_FF} for $57{,}821$ ($0.19\%$) and
-\emph{pure\_FB} for only $22{,}065$ ($0.07\%$). This is not a surprising
+is $94.4\%$ of the total, while \emph{pure\_LAT} accounts for
+$1{,}651{,}892$ ($5.3\%$), \emph{pure\_FWD} for $57{,}821$ ($0.19\%$) and
+\emph{pure\_BWD} for only $22{,}065$ ($0.07\%$). This is not a surprising
 finding so much as an arithmetic one: with four edges each independently
 able to run in three directions, complete agreement among all four is simply
 improbable, and the coarse label therefore carries very little information.
@@ -1556,17 +1853,17 @@ behaviour differs considerably, as Figure~\ref{fig:signature-distrib} shows.
 \caption[Directional signature distribution]{Decomposition of the sixteen
 directional signatures on window $\{1,2,3\}$, by number of patterns on the
 left and by share of total count mass on the right. The two panels disagree
-substantially: \code{mix->FF} is frequent but carries almost no mass, while
-\code{FF->mix} is the reverse. The pure signatures \code{FF->FF} and
-\code{FB->FB} are highlighted, and their rarity is what makes the coarse
+substantially: \code{mix->FWD} is frequent but carries almost no mass, while
+\code{FWD->mix} is the reverse. The pure signatures \code{FWD->FWD} and
+\code{BWD->BWD} are highlighted, and their rarity is what makes the coarse
 four-way classification uninformative.}
 \label{fig:signature-distrib}
 \end{figure}
 
 The two panels of that figure disagree in an instructive way. A signature
 may account for many distinct patterns while contributing almost nothing to
-the total count, as \code{mix->FF} does, or account for relatively few
-patterns each of which is realised enormously often, as \code{FF->mix} does.
+the total count, as \code{mix->FWD} does, or account for relatively few
+patterns each of which is realised enormously often, as \code{FWD->mix} does.
 Reporting only one of the two quantities would therefore give a misleading
 picture, and both are reported throughout.
 
@@ -1582,11 +1879,11 @@ deep window.}
 \toprule
 Signature & $\{1,2,3\}$ (\% mass) & $\{3,4,5\}$ (\% mass) \\
 \midrule
-\code{lat->mix}  &  9.2 & \textbf{42.7} \\
-\code{mix->lat}  & 10.3 & \textbf{23.3} \\
-\code{lat->lat}  &  0.6 & \textbf{10.2} \\
+\code{LAT->mix}  &  9.2 & \textbf{42.7} \\
+\code{mix->LAT}  & 10.3 & \textbf{23.3} \\
+\code{LAT->LAT}  &  0.6 & \textbf{10.2} \\
 \code{mix->mix}  & \textbf{38.5} & 13.9 \\
-\code{FF->mix}   & 13.3 &  1.5 \\
+\code{FWD->mix}   & 13.3 &  1.5 \\
 \midrule
 \emph{any purely lateral branch} & \emph{20.1} & \textbf{\emph{76.2}} \\
 \bottomrule
@@ -1609,7 +1906,7 @@ within a processing stage rather than by advancing through the hierarchy.
 mass by directional signature in the shallow and deep windows, sorted by the
 size of the shift between them. Shaded rows are signatures containing a
 purely lateral branch, and they gain almost exactly what the others lose.
-\code{lat->mix} alone rises from $9.2\%$ to $42.7\%$.}
+\code{LAT->mix} alone rises from $9.2\%$ to $42.7\%$.}
 \label{fig:signature-shift}
 \end{figure}
 
@@ -1624,12 +1921,15 @@ class.
 \includegraphics[width=0.92\textwidth]{motif_top1.png}
 \caption[The most frequent bow-tie motif]{The single most frequent bow-tie
 motif of window $\{1,2,3\}$, with $2.80 \times 10^{12}$ instances and
-signature \code{FF->lat}. Two medulla groups at level~2 converge onto the
-lobula at level~3, which then distributes laterally within level~3. Grey
-edges are feed-forward and blue edges lateral. The pattern is a compact
-illustration of the general finding: the dominant structures combine a
-feed-forward entry with a lateral spread rather than being purely
-feed-forward.}
+signature \code{FWD->LAT}. The vertical axis is the hierarchical level, with
+depth increasing downwards and each level drawn as a shaded band, so that the
+direction of an edge is given by its slope: an edge that descends runs
+forward, one that rises runs backward, and a horizontal one is lateral. Two
+medulla groups at level~2 converge onto the lobula at level~3, which then
+distributes laterally within level~3. Grey edges are forward and blue edges
+lateral. The pattern is a compact illustration of the general finding: the
+dominant structures combine a forward entry with a lateral spread rather than
+being purely forward.}
 \label{fig:motif-top1}
 \end{figure}
 
@@ -1637,13 +1937,19 @@ feed-forward.}
 \centering
 \includegraphics[width=0.86\textwidth]{hourglass_catalog_1.png}
 \caption[Representative motifs by signature, part 1]{Representative bow-tie
-motifs for the first four directional signatures, window $\{1,2,3\}$. Each
-panel places the input groups on the left, the waist in the centre and the
-output groups on the right; node labels give the anatomical group and its
-hierarchical level, node colour encodes the macro-area, and edge colour the
-direction, with grey for feed-forward, red for feedback and blue for
-lateral. The counts above each panel are numbers of neuron-level instances,
-and they differ between classes by nearly three orders of magnitude.}
+motifs for the first four directional signatures, window $\{1,2,3\}$. The
+horizontal axis carries the role a group plays in the motif, with the input
+groups on the left, the waist in the centre and the output groups on the
+right; the vertical axis carries the hierarchical level, drawn as shaded
+bands labelled at the left margin, with depth increasing downwards. The two
+axes together make the structure legible from the shape alone: an edge that
+descends is forward, one that rises is backward, and a horizontal one is
+lateral, so the signature can be read without consulting the node labels.
+Labels give the anatomical group, node colour encodes the macro-area, and
+edge colour repeats the direction, with grey for forward, red for backward
+and blue for lateral. The counts above each panel are numbers of neuron-level
+instances, and they differ between classes by nearly three orders of
+magnitude.}
 \label{fig:motif-catalog-1}
 \end{figure}
 
@@ -1756,27 +2062,32 @@ structures must be the most important ones.
 \label{sec:results-granularity}
 
 Section~\ref{sec:groups} argued for grouping neurons by anatomical group
-rather than by functional super-class. Since that choice conditions every
-result in this chapter, and since the alternative is the one adopted in the
-related work of Section~\ref{sec:related}, the entire search was repeated at
-super-class granularity so that the two could be compared directly rather
-than argued about.
+rather than by functional super-class or by super-region. Since that choice
+conditions every result in this chapter, and since the coarsest of the three
+is the one adopted in the related work of Section~\ref{sec:related}, the
+entire search was repeated at both of the other granularities on the shallow
+window, so that the comparison could be made on results rather than in the
+abstract. The three runs differ only in the map from neurons to categories;
+the window, the parameters, the engine and the pruning are identical.
 
 \begin{table}[H]
 \centering
-\caption{The same search on window $\{1,2,3\}$ under the two
-categorisations.}
+\caption{The same search on window $\{1,2,3\}$ under the three
+categorisations. Categories counts the values present in the window, and
+metagraph edges counts distinct ordered pairs of metanodes joined by at least
+one synapse within one level of each other.}
 \label{tab:granularity}
-\begin{tabular}{lrr}
+\begin{tabular}{lrrr}
 \toprule
- & super-class & anatomical group \\
+ & super-class & super-region & anatomical group \\
 \midrule
-categories                & 9 & 628 \\
-metanodes                 & 24 & 879 \\
-metagraph edges           & 293 & 42,867 \\
-median neurons / metanode & 511 & 3 \\
-motifs found              & 29,091 & 31,184,800 \\
-runtime                   & 6.4\,s & 14m39s \\
+categories in window      & 9      & 76        & 477 \\
+metanodes                 & 24     & 188       & 879 \\
+metagraph edges           & 293    & 6{,}295   & 24{,}914 \\
+median neurons / metanode & 511    & 11        & 3 \\
+distinct waists           & 20     & 157       & 660 \\
+motifs found              & 29{,}091 & 4{,}923{,}197 & 31{,}184{,}800 \\
+runtime                   & 6.7\,s & 2m31s     & 14m39s \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1790,47 +2101,113 @@ carrying the most mass in the coarse run is \emph{visual centrifugal} at
 level~2, a metanode of only $311$ neurons with an effective size of $3.9$.
 Narrow waists emerge perfectly well at coarse granularity, because what
 produces a high count is convergence and divergence structure, not
-population. The coarse analysis is also very cheap, finishing in six seconds
-and yielding twenty-nine thousand patterns rather than thirty-one million,
-which makes it far easier to inspect by hand.
+population. The coarse analysis is also very cheap, finishing in under seven
+seconds and yielding twenty-nine thousand patterns rather than thirty-one
+million, which makes it far easier to inspect by hand.
 
-What the coarse analysis loses is anatomical resolution, and this is visible
-in the leading pattern of each run. At super-class granularity it reads
+What the coarse analysis loses is anatomical resolution, and the clearest way
+to see it is to put the leading pattern of the three runs side by side. At
+super-class granularity the most frequent bow-tie reads
 \[
 [\text{central L1},\ \text{central L2}] \rightarrow
 \text{visual centrifugal L2} \rightarrow
 [\text{optic L1},\ \text{optic L2}],
 \]
 which says that central neurons converge on visual centrifugal neurons that
-project to optic ones. At group granularity the leading pattern reads
+project to optic ones. At super-region granularity it reads
+\[
+[\code{AL\_L1},\ \code{AL\_L2}] \rightarrow \code{AL.MB\_L2} \rightarrow
+[\code{MB\_L2},\ \code{MB\_L3}],
+\]
+which is already a recognisable circuit: two antennal lobe populations
+converge on neurons spanning the antennal lobe and the mushroom body, which
+then project into the mushroom body. That is the olfactory pathway, and it is
+the pathway on which several of the results of this chapter turn. At group
+granularity the leading pattern reads
 \[
 [\code{ME\_L2},\ \code{ME.LO\_L2}] \rightarrow \code{LO\_L3} \rightarrow
-[\code{LO.LOP\_L2},\ \code{ME.LOP\_L2}],
+[\code{LO.LOP\_L3},\ \code{ME.LOP\_L3}],
 \]
-which names a circuit: two medulla populations converge on the lobula, which
-distributes to the lobula plate. The first statement is true and the second
-is more specific; whether the difference matters depends on the question
-being asked.
+which names a specific circuit within the optic lobe: two medulla populations
+converge on the lobula, which distributes within its own level to the lobula
+plate. All three statements are true of the same connectome; they differ in
+how much they commit to.
 
-For the questions asked in this thesis it matters decisively. The category
-\emph{central} contains $521$ distinct anatomical groups, and the antennal
-lobe projection neurons, the Kenyon cells, the mushroom body output neurons
-and the lateral horn all fall within it without exception. The sequence
-reported in Section~\ref{sec:results-sweep}, in which projection neurons
-broadcast onto Kenyon cells that then feed integrative output
-neurons, therefore has all three of its stages inside a single super-class
-node and cannot be observed at that granularity at all. The same applies to
-the compression results of Section~\ref{sec:results-compression}, which
-identify particular neuropils as bottlenecks, and to the recurrence result of
-Section~\ref{sec:optic-recurrence}, which separates re-entry into the lobula
-from relay through the lobula plate.
+The gap between the first and the other two is not a matter of degree. The
+category \emph{central} contains $521$ distinct anatomical groups, and the
+antennal lobe projection neurons, the Kenyon cells, the mushroom body output
+neurons and the lateral horn all fall within it without exception. The
+olfactory sequence just described therefore has every one of its stages
+inside a single super-class node, and this is why the coarse run does not
+merely rank it lower but cannot express it at all. The same holds for the
+sequence reported in Section~\ref{sec:results-sweep}, in which projection
+neurons broadcast onto Kenyon cells that then feed integrative output
+neurons; for the compression results of Section~\ref{sec:results-compression},
+which identify particular neuropils as bottlenecks; and for the recurrence
+result of Section~\ref{sec:optic-recurrence}, which separates re-entry into
+the lobula from relay through the lobula plate. None of these survives the
+collapse of the central brain into one node.
 
-The two granularities are therefore complementary rather than competing. The
-coarse one gives a cheap global picture and is directly comparable with
-earlier work on this connectome; the fine one is required for any claim about
-which structure does what. Reporting both, as this section does, costs six
-seconds of computation and removes the need to defend the choice in the
-abstract.
+The super-region granularity is the interesting middle case, because it
+recovers most of what matters at a fraction of the cost. It is fine enough to
+name the olfactory pathway, to separate the optic lobe from the central
+complex and to distinguish the mushroom body from the lateral horn, and it
+does so with $188$ metanodes rather than $879$ and in a sixth of the runtime.
+What it cannot do is separate structures within a super-region: the calyx,
+the pedunculus and the two lobes of the mushroom body are one node, so a
+claim about where in the mushroom body a bottleneck sits is unavailable, and
+the medulla, lobula and lobula plate are likewise merged, which is fatal to
+the recurrence analysis of Section~\ref{sec:optic-recurrence}. It is the
+right granularity for an overview and the wrong one for the questions this
+thesis asks, but it is a genuinely useful third point of reference, and its
+existence means the choice made here is not a binary one between an
+unusable coarse view and an over-specific fine one.
+
+\subsubsection{What the Abstraction Actually Buys}
+\label{sec:abstraction-cost}
+
+A fair objection to the fine granularity is that it weakens the abstraction
+as a device for reducing complexity. If there are six hundred possible
+categories per level, the metagraph starts to look less like a summary of the
+connectome and more like a relabelling of it, and the reduction that
+justified moving from neurons to metanodes in Section~\ref{sec:groups} is
+correspondingly smaller. The objection is sound in direction, and the honest
+answer is to quantify it rather than to deflect it.
+
+On the shallow window the connectome contributes $104{,}915$ neurons and
+$1{,}296{,}899$ distinct neuron-to-neuron connections within one level of
+each other. The three abstractions reduce the nodes by factors of $4{,}371$,
+$558$ and $119$ respectively, and the edges by factors of $4{,}426$, $206$
+and $52$. The finest choice therefore still removes two orders of magnitude
+from both, which is not nothing, but it removes a great deal less than the
+coarsest one, and the number of metanodes it leaves, $879$, is of the same
+order as the number of anatomical groups themselves. A reader who expected
+the abstraction to leave a graph small enough to be inspected whole will not
+find one.
+
+Two things should be said in response. The first is that the reduction
+matters less than it appears, because the search cost is not driven by the
+number of metanodes but by the number of combinations of them around each
+waist, and the pruning of Section~\ref{sec:pruning} removes most of those
+before they are ever formed. The shallow window runs in fifteen minutes at
+$879$ metanodes, so the abstraction is doing enough work to make an
+exhaustive count feasible, which was its purpose.
+
+The second, and the more important, is that reduction was never the only
+objective. The abstraction has two jobs, and they pull against each other:
+it must make the count tractable, and it must leave the result
+interpretable. A metagraph of twenty-four nodes is maximally reduced and
+tells us that \emph{central} neurons feed \emph{visual centrifugal} ones,
+which is not a circuit. A metagraph of $879$ nodes is less reduced and tells
+us that the medulla feeds the lobula, which is. The right measure of an
+abstraction is not how much it compresses but how much of the compression it
+achieves without destroying the distinctions the question depends on, and by
+that measure the evidence in this section favours the finer choice, with the
+super-region available as an intermediate whenever a coarser summary is
+wanted. The three granularities are complementary rather than competing:
+reporting all three costs less than three minutes of computation, and it
+replaces an argument about which one is correct with a measurement of what
+each one recovers.
 
 \subsection{Waist Compression}
 \label{sec:results-compression}
@@ -1880,15 +2257,15 @@ Restricting attention to the two recurrent signatures reveals something that
 the aggregate figures conceal, namely that the two do not live in the same
 place.
 
-The re-entrant form, \code{FF->FB}, comprises $786{,}216$ patterns, which is
+The re-entrant form, \code{FWD->BWD}, comprises $786{,}216$ patterns, which is
 $2.52\%$ of the total, carrying a mass of $1.12 \times 10^{12}$ or $1.10\%$.
 Its waist is the lobula, \code{LO\_L3}, in $88.5\%$ of that mass, and its
 leading pattern has two medulla groups converging onto the lobula which then
-projects onto two lobula plate groups. The relay form, \code{FB->FF},
+projects onto two lobula plate groups. The relay form, \code{BWD->FWD},
 comprises a very similar number of patterns, $822{,}466$, but carries nine
 times less mass, and it sits on a different structure altogether: the lobula
 plate, \code{LOP\_L2}, in $93.2\%$ of its mass. Pure feedback,
-\code{FB->FB}, is negligible in mass and also lives on \code{LOP\_L2}.
+\code{BWD->BWD}, is negligible in mass and also lives on \code{LOP\_L2}.
 
 The two forms of recurrence are therefore anatomically separated rather than
 being two descriptions of one phenomenon. Re-entry into the lobula and relay
@@ -1939,18 +2316,18 @@ complementary null models. The extremes swap places.}
 \toprule
 Signature & Null A (degrees kept) & Null B/C (anatomy kept) \\
 \midrule
-\code{FF->FF}  & $2.21 \times 10^{5}$ \emph{(highest)} & $8.4$--$11.4$ \emph{(lowest)} \\
-\code{mix->FF} & $2.06 \times 10^{3}$ & $4.7 \times 10^{4}$ \\
-\code{FB->FB}  & $1.98 \times 10^{3}$ & $9.2 \times 10^{3}$ \\
-\code{lat->lat}& $1.84 \times 10^{3}$ & $6.4 \times 10^{5}$ \\
+\code{FWD->FWD}  & $2.21 \times 10^{5}$ \emph{(highest)} & $8.4$--$11.4$ \emph{(lowest)} \\
+\code{mix->FWD} & $2.06 \times 10^{3}$ & $4.7 \times 10^{4}$ \\
+\code{BWD->BWD}  & $1.98 \times 10^{3}$ & $9.2 \times 10^{3}$ \\
+\code{LAT->LAT}& $1.84 \times 10^{3}$ & $6.4 \times 10^{5}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The signature \code{FF->FF} is the most enriched of all when degree
+The signature \code{FWD->FWD} is the most enriched of all when degree
 sequences are preserved and anatomy destroyed, and the \emph{least} enriched
 when anatomy is preserved and the degree alignment destroyed. The signature
-\code{lat->lat} moves in the opposite direction by more than two orders of
+\code{LAT->LAT} moves in the opposite direction by more than two orders of
 magnitude.
 
 The interpretation is straightforward once stated. Purely feed-forward
@@ -2082,12 +2459,12 @@ Table~\ref{tab:nt} and Figure~\ref{fig:nt-windows}.
 
 \begin{table}[H]
 \centering
-\caption{Excitatory fraction of the waist, \emph{pure\_FB} against
-\emph{pure\_FF}, compared at parity of waist across all four level windows.}
+\caption{Excitatory fraction of the waist, \emph{pure\_BWD} against
+\emph{pure\_FWD}, compared at parity of waist across all four level windows.}
 \label{tab:nt}
 \begin{tabular}{lrrrrr}
 \toprule
-Window & Shared waists & \emph{pure\_FB} & \emph{pure\_FF} & Gap at parity & $p$ \\
+Window & Shared waists & \emph{pure\_BWD} & \emph{pure\_FWD} & Gap at parity & $p$ \\
 \midrule
 $\{1,2,3\}$     &  86 & 0.393 & 0.511 & $+0.117$ & 0.0033 \\
 $\{3,4,5\}$     & 221 & 0.501 & 0.547 & $+0.046$ & 0.0098 \\
@@ -2101,7 +2478,7 @@ $\{1,2,3,4,5\}$ & \textbf{492} & 0.483 & 0.504 & $+0.021$ & \textbf{0.098} \\
 \centering
 \includegraphics[width=0.90\textwidth]{nt_across_windows.png}
 \caption[The neurotransmitter result across all four windows]{Excitatory
-fraction gap between \emph{pure\_FF} and \emph{pure\_FB} waists, measured at
+fraction gap between \emph{pure\_FWD} and \emph{pure\_BWD} waists, measured at
 parity of waist, across all four level windows, with asterisks marking
 $p < 0.05$. Window $\{2,3,4\}$ falls on the opposite side of zero from the
 others, and the full window, which has the most shared waists and subsumes
@@ -2122,9 +2499,9 @@ window; there is consequently not even an effect present to be explained.
 \subsubsection{Why the First Window Looked Convincing}
 
 The explanation lies in where the two classes of motif happen to sit. On the
-shallow window the \emph{pure\_FF} motifs concentrate in
+shallow window the \emph{pure\_FWD} motifs concentrate in
 \code{AL.MB\_CA}, which is essentially fully excitatory, while the
-\emph{pure\_FB} motifs concentrate in the optic lobe, which is inhibitory.
+\emph{pure\_BWD} motifs concentrate in the optic lobe, which is inhibitory.
 The apparent difference between motif classes is thus a difference between
 brain regions wearing the costume of a difference between circuit types.
 
@@ -2284,7 +2661,7 @@ signals, which is the property that makes the surviving results worth
 reporting.
 
 Three findings survive the control. The antennal lobe shows $31\%$ of its
-motifs in the \code{lat->lat} class, with its neurons spread across several
+motifs in the \code{LAT->LAT} class, with its neurons spread across several
 levels rather than concentrated in one, and it is the only genuinely
 informative lateral case in the dataset. It corresponds to the network of
 local interneurons that performs lateral inhibition between olfactory
@@ -2523,6 +2900,11 @@ D.~Curcio.
   Hierarchical Motif Discovery in the Adult Connectome}.
 \newblock Master's thesis, University of Applied Sciences Upper Austria and
   University of Calabria, 2026.
+
+\bibitem{ito2014}
+K.~Ito et al.
+\newblock A systematic nomenclature for the insect brain.
+\newblock \emph{Neuron}, 81(4):755--765, 2014.
 
 \bibitem{lin2024}
 A.~Lin et al.

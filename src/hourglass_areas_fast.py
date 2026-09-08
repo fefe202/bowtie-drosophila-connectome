@@ -78,6 +78,14 @@ def build_graph(NL_WINDOW, max_jump, conn_file, levels_file, neurons_file,
         dc = pd.read_csv(class_file, usecols=["root_id", "super_class"])
         dc = dc.dropna(subset=["super_class"])
         area_map = dc.set_index("root_id")["super_class"].to_dict()
+    elif grouping == "superregion":
+        # Granularita' intermedia: i 44 neuropili di base si raggruppano
+        # nelle super-regioni della nomenclatura standard, che sono tredici.
+        from neuropil_taxonomy import superregion_of_group
+        dn = df_neurons.dropna(subset=["group"])
+        dn = dn[dn["group"] != "NO_CONS"]
+        area_map = {r: superregion_of_group(g)
+                    for r, g in zip(dn["root_id"], dn["group"])}
     else:
         dn = df_neurons.dropna(subset=["group"])
         dn = dn[dn["group"] != "NO_CONS"]
@@ -119,7 +127,7 @@ def build_graph(NL_WINDOW, max_jump, conn_file, levels_file, neurons_file,
 def run(NL_WINDOW, out_folder, k_in, k_out, max_jump, min_count,
         conn_file, levels_file, neurons_file, engine="matrix", limit=0,
         budget=MATRIX_BUDGET, gz=False, full_csv=False,
-        grouping="group", class_file=None):
+        grouping="group", class_file=None, dist_dir=None):
     t0 = time.time()
     os.makedirs(out_folder, exist_ok=True)
     print("=" * 74)
@@ -135,7 +143,7 @@ def run(NL_WINDOW, out_folder, k_in, k_out, max_jump, min_count,
         f"{len(submat):,} archi del metagrafo")
 
     header = ["motif_count", "hourglass_type", "signature", "fanin_sig",
-              "fanout_sig", "n_FF", "n_FB", "n_lat", "n_waist",
+              "fanout_sig", "n_FWD", "n_BWD", "n_LAT", "n_waist",
               "n_waist_active", "n_waist_eff", "n_periphery", "compression",
               "bottleneck_area", "bottleneck_level", "k_in", "k_out",
               "structure_str"]
@@ -264,9 +272,10 @@ def run(NL_WINDOW, out_folder, k_in, k_out, max_jump, min_count,
 
     if fh is not None:
         fh.close()
-    dist_dir = os.path.join(os.path.dirname(os.path.dirname(out_folder)),
-                            "motif_distilled",
-                            "-".join(map(str, NL_WINDOW)))
+    if dist_dir is None:
+        dist_dir = os.path.join(
+            os.path.dirname(os.path.dirname(out_folder)), "motif_distilled",
+            "-".join(map(str, NL_WINDOW)))
     if dist.k is not None:
         dist.finalize(dist_dir, "-".join(map(str, NL_WINDOW)),
                       {"max_jump": max_jump, "min_count": min_count})
@@ -472,10 +481,12 @@ def main():
     ap.add_argument("--min_count", type=int, default=10)
     ap.add_argument("--engine", choices=["matrix", "loop", "sparse"],
                     default="matrix")
-    ap.add_argument("--grouping", choices=["group", "superclass"],
+    ap.add_argument("--grouping",
+                    choices=["group", "superclass", "superregion"],
                     default="group",
                     help="granularita' dei metanodi: gruppo anatomico "
-                         "(628 categorie) o superclasse funzionale (9)")
+                         "(628 categorie), super-regione di neuropili (79) "
+                         "o superclasse funzionale (9)")
     ap.add_argument("--class_file", default=data("classification.csv"))
     ap.add_argument("--full_csv", action="store_true",
                     help="Scrive anche il CSV riga-per-riga. Di default NON "
@@ -492,6 +503,11 @@ def main():
     ap.add_argument("--verify", action="store_true",
                     help="Esegue entrambi i motori e confronta i CSV riga per riga")
     ap.add_argument("--outdir", default=results("hourglass_results"))
+    ap.add_argument("--dist_dir", default=None,
+                    help="cartella degli artefatti distillati. Di default "
+                         "results/motif_distilled/<finestra>; va indicata "
+                         "quando si lancia una granularita' diversa, per non "
+                         "sovrascrivere i risultati per gruppo anatomico.")
     ap.add_argument("--conn_file", default=data("connections.csv"))
     ap.add_argument("--levels_file",
                     default=data("COORDINATE_XY_with_levels_tree.csv"))
@@ -534,7 +550,7 @@ def main():
     run(NL, out, a.k_in, a.k_out, a.max_jump, a.min_count,
         a.conn_file, a.levels_file, a.neurons_file, a.engine, a.limit,
         a.budget_mb * 1024 * 1024, a.gzip, a.full_csv,
-        a.grouping, a.class_file)
+        a.grouping, a.class_file, a.dist_dir)
 
 
 if __name__ == "__main__":

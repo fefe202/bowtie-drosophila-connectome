@@ -67,16 +67,16 @@ def to_dense_1d(v):
 def classify_edge(src_level, dst_level):
     """Classifica un arco in base alla direzione nei livelli gerarchici."""
     if src_level < dst_level:
-        return "FF"
+        return "FWD"
     elif src_level > dst_level:
-        return "FB"
-    return "lateral"
+        return "BWD"
+    return "LAT"
 
 
 def classify_hourglass(fan_in_keys, bottleneck_key, fan_out_keys):
     """
     Classifica un hourglass completo.
-    Returns: 'pure_FF', 'pure_FB', 'mixed', o 'pure_lateral'
+    Returns: 'pure_FWD', 'pure_BWD', 'mixed', o 'pure_LAT'
     """
     edge_types = set()
     bn_level = bottleneck_key[1]
@@ -86,12 +86,12 @@ def classify_hourglass(fan_in_keys, bottleneck_key, fan_out_keys):
     for (_, level) in fan_out_keys:
         edge_types.add(classify_edge(bn_level, level))
 
-    if edge_types == {"FF"}:
-        return "pure_FF"
-    if edge_types == {"FB"}:
-        return "pure_FB"
-    if edge_types == {"lateral"}:
-        return "pure_lateral"
+    if edge_types == {"FWD"}:
+        return "pure_FWD"
+    if edge_types == {"BWD"}:
+        return "pure_BWD"
+    if edge_types == {"LAT"}:
+        return "pure_LAT"
     return "mixed"
 
 
@@ -99,20 +99,20 @@ def signature_hourglass(fan_in_keys, bottleneck_key, fan_out_keys):
     """
     Firma direzionale FINE, che scompone l'etichetta unica `hourglass_type`.
 
-    Con k_in + k_out archi, `pure_FF` richiede che TUTTI siano feed-forward:
+    Con k_in + k_out archi, `pure_FWD` richiede che TUTTI siano in avanti:
     la dominanza di `mixed` (94% dei pattern) e' quasi tautologica e non dice
     nulla sulle ricorrenze, che sono l'interesse principale del docente.
     Qui il ramo entrante e quello uscente vengono descritti separatamente:
 
-        fanin_sig  = direzione comune degli archi di fan-in  (FF/FB/lat/mix)
-        fanout_sig = direzione comune degli archi di fan-out (FF/FB/lat/mix)
+        fanin_sig  = direzione comune degli archi di fan-in  (FWD/BWD/LAT/mix)
+        fanout_sig = direzione comune degli archi di fan-out (FWD/BWD/LAT/mix)
         signature  = "fanin_sig->fanout_sig"
 
-    La classe FF->FB e' la *clessidra ri-entrante*: l'informazione converge in
+    La classe FWD->BWD e' la *clessidra ri-entrante*: l'informazione converge in
     avanti sul waist, che poi la rimanda a livelli inferiori. E' il substrato
     strutturale della ricorrenza.
 
-    Returns: (n_FF, n_FB, n_lat, fanin_sig, fanout_sig, signature)
+    Returns: (n_FWD, n_BWD, n_LAT, fanin_sig, fanout_sig, signature)
     """
     bn_level = bottleneck_key[1]
     in_dirs = [classify_edge(lv, bn_level) for (_, lv) in fan_in_keys]
@@ -120,15 +120,12 @@ def signature_hourglass(fan_in_keys, bottleneck_key, fan_out_keys):
     all_dirs = in_dirs + out_dirs
 
     def collapse(dirs):
-        # "lateral" si normalizza in "lat", come in directional_signature.py
-        s = set(dirs)
-        d = dirs[0] if len(s) == 1 else "mix"
-        return "lat" if d == "lateral" else d
+        return dirs[0] if len(set(dirs)) == 1 else "mix"
 
     fanin_sig = collapse(in_dirs)
     fanout_sig = collapse(out_dirs)
     return (
-        all_dirs.count("FF"), all_dirs.count("FB"), all_dirs.count("lateral"),
+        all_dirs.count("FWD"), all_dirs.count("BWD"), all_dirs.count("LAT"),
         fanin_sig, fanout_sig, f"{fanin_sig}->{fanout_sig}",
     )
 

@@ -34,6 +34,7 @@ import pandas as pd
 from scipy import sparse
 
 from motif_distill import load as load_distilled
+from directional_signature import normalize_directions
 
 NT_CLASS_DEFAULT = {
     "ACH": "E",
@@ -90,8 +91,8 @@ def mode_global(args):
     ntcls = np.array([nt_map.get(p, "U") for p in pre[keep]])
     log(f"  {keep.sum():,} coppie con livello su entrambi gli estremi")
 
-    direction = np.where(lv_pre < lv_post, "FF",
-                         np.where(lv_pre > lv_post, "FB", "lateral"))
+    direction = np.where(lv_pre < lv_post, "FWD",
+                         np.where(lv_pre > lv_post, "BWD", "LAT"))
     res = pd.DataFrame({"direction": direction, "nt": ntcls, "syn": syn})
 
     print("\n" + "=" * 78)
@@ -106,7 +107,7 @@ def mode_global(args):
         else:
             tab = pd.crosstab(res["direction"], res["nt"],
                               values=res[weights], aggfunc="sum").fillna(0)
-        tab = tab.reindex(index=["FF", "lateral", "FB"],
+        tab = tab.reindex(index=["FWD", "LAT", "BWD"],
                           columns=[c for c in CLASSES if c in tab.columns],
                           fill_value=0)
         pct = tab.div(tab.sum(axis=1), axis=0) * 100
@@ -123,16 +124,17 @@ def mode_global(args):
 
     sub = res[res["nt"].isin(["E", "I"])]
     tab_ei = pd.crosstab(sub["direction"], sub["nt"])
-    tab_ei = tab_ei.reindex(index=["FF", "lateral", "FB"], fill_value=0)
+    tab_ei = tab_ei.reindex(index=["FWD", "LAT", "BWD"], fill_value=0)
     try:
         from scipy.stats import chi2_contingency, fisher_exact
         chi2, p, dof, _ = chi2_contingency(tab_ei.values)
         print(f"\n  [test] chi-quadro direzione x (E,I): "
               f"chi2 = {chi2:,.1f}, dof = {dof}, p = {p:.3g}")
-        odds, pf = fisher_exact(tab_ei.loc[["FF", "FB"], ["E", "I"]].values)
-        print(f"  [test] Fisher FF vs FB: odds ratio = {odds:.3f}, p = {pf:.3g}")
-        print("         odds ratio > 1  =>  il feed-forward e piu eccitatorio "
-              "del feedback, cioe il feedback e piu inibitorio")
+        odds, pf = fisher_exact(tab_ei.loc[["FWD", "BWD"], ["E", "I"]].values)
+        print(f"  [test] Fisher FWD vs BWD: odds ratio = {odds:.3f}, "
+              f"p = {pf:.3g}")
+        print("         odds ratio > 1  =>  gli archi in avanti sono piu "
+              "eccitatori di quelli all'indietro")
     except Exception as e:
         print(f"  [WARN] test non calcolato: {e}")
 
@@ -155,13 +157,13 @@ def mode_global(args):
 
     rows = []
     for g, sub_g in res2.groupby("grp"):
-        ff = sub_g[sub_g["direction"] == "FF"]
-        fb = sub_g[sub_g["direction"] == "FB"]
+        ff = sub_g[sub_g["direction"] == "FWD"]
+        fb = sub_g[sub_g["direction"] == "BWD"]
         if len(ff) >= args.strat_min and len(fb) >= args.strat_min:
             rows.append({
-                "group": g, "n_FF": len(ff), "n_FB": len(fb),
-                "fracE_FF": (ff["nt"] == "E").mean(),
-                "fracE_FB": (fb["nt"] == "E").mean(),
+                "group": g, "n_FWD": len(ff), "n_BWD": len(fb),
+                "fracE_FWD": (ff["nt"] == "E").mean(),
+                "fracE_BWD": (fb["nt"] == "E").mean(),
             })
     st = pd.DataFrame(rows)
     print("\n" + "-" * 78)
@@ -171,22 +173,24 @@ def mode_global(args):
         print(f"  Troppi pochi gruppi con >= {args.strat_min} archi FF e FB "
               f"({len(st)}): controllo non eseguito.")
     else:
-        st["delta"] = st["fracE_FF"] - st["fracE_FB"]
+        st["delta"] = st["fracE_FWD"] - st["fracE_BWD"]
         n_pos = int((st["delta"] > 0).sum())
-        print(f"  Gruppi con >= {args.strat_min} archi FF e >= {args.strat_min} "
-              f"archi FB: {len(st)}")
-        print(f"  Frazione eccitatoria media, archi FF: {st['fracE_FF'].mean():.4f}")
-        print(f"  Frazione eccitatoria media, archi FB: {st['fracE_FB'].mean():.4f}")
-        print(f"  Delta (FF - FB): mediana = {st['delta'].median():+.4f}, "
+        print(f"  Gruppi con >= {args.strat_min} archi FWD e "
+              f">= {args.strat_min} archi BWD: {len(st)}")
+        print(f"  Frazione eccitatoria media, archi FWD: "
+              f"{st['fracE_FWD'].mean():.4f}")
+        print(f"  Frazione eccitatoria media, archi BWD: "
+              f"{st['fracE_BWD'].mean():.4f}")
+        print(f"  Delta (FWD - BWD): mediana = {st['delta'].median():+.4f}, "
               f"media = {st['delta'].mean():+.4f}")
-        print(f"  Gruppi in cui gli archi FF sono piu' eccitatori dei FB: "
+        print(f"  Gruppi in cui gli archi FWD sono piu' eccitatori dei BWD: "
               f"{n_pos}/{len(st)} ({100*n_pos/len(st):.1f}%)")
         try:
             from scipy.stats import wilcoxon
-            stat, pw = wilcoxon(st["fracE_FF"], st["fracE_FB"])
+            stat, pw = wilcoxon(st["fracE_FWD"], st["fracE_BWD"])
             print(f"  [test] Wilcoxon appaiato: statistica = {stat:,.0f}, "
                   f"p = {pw:.3g}")
-            print("         Se il gradiente FF/FB sopravvive a questo test,")
+            print("         Se il gradiente FWD/BWD sopravvive a questo test,")
             print("         NON e' un artefatto della composizione regionale.")
         except Exception as e:
             print(f"  [WARN] Wilcoxon non calcolato: {e}")
@@ -198,35 +202,35 @@ def mode_global(args):
     # Decomposizione di kitagawa
     # Il test appaiato esclude i gruppi specializzati in una sola direzione.
     # Qui si usano TUTTI i gruppi e si scompone esattamente il divario
-    # P(E|FF) - P(E|FB) in due contributi:
-    #   COMPOSIZIONE  : quali gruppi emettono archi FF vs FB
-    #   EFFETTO INTERNO: a parita' di gruppo, differenza fra archi FF e FB
+    # P(E|FWD) - P(E|BWD) in due contributi:
+    #   COMPOSIZIONE  : quali gruppi emettono archi FWD vs BWD
+    #   EFFETTO INTERNO: a parita' di gruppo, differenza fra FWD e BWD
     # Identita' algebrica esatta (media dei pesi / media delle proporzioni).
     agg = res2.groupby(["grp", "direction"])["nt"].agg(
         n="size", pE=lambda s: (s == "E").mean()).reset_index()
     piv_n = agg.pivot(index="grp", columns="direction", values="n").fillna(0.0)
     piv_p = agg.pivot(index="grp", columns="direction", values="pE")
-    for c in ("FF", "FB"):
+    for c in ("FWD", "BWD"):
         if c not in piv_n.columns:
             piv_n[c] = 0.0
             piv_p[c] = np.nan
     # dove una direzione manca, si usa la proporzione dell'altra: il termine
     # interno di quel gruppo e' nullo e tutto ricade sulla composizione
-    piv_p["FF"] = piv_p["FF"].fillna(piv_p["FB"])
-    piv_p["FB"] = piv_p["FB"].fillna(piv_p["FF"])
-    ok_rows = piv_p[["FF", "FB"]].notna().all(axis=1)
+    piv_p["FWD"] = piv_p["FWD"].fillna(piv_p["BWD"])
+    piv_p["BWD"] = piv_p["BWD"].fillna(piv_p["FWD"])
+    ok_rows = piv_p[["FWD", "BWD"]].notna().all(axis=1)
     piv_n, piv_p = piv_n[ok_rows], piv_p[ok_rows]
 
-    wFF = piv_n["FF"] / piv_n["FF"].sum()
-    wFB = piv_n["FB"] / piv_n["FB"].sum()
-    pFF, pFB = piv_p["FF"], piv_p["FB"]
+    wFF = piv_n["FWD"] / piv_n["FWD"].sum()
+    wFB = piv_n["BWD"] / piv_n["BWD"].sum()
+    pFF, pFB = piv_p["FWD"], piv_p["BWD"]
     P_FF = float((wFF * pFF).sum())
     P_FB = float((wFB * pFB).sum())
     comp = float(((wFF - wFB) * (pFF + pFB) / 2).sum())
     within = float(((wFF + wFB) / 2 * (pFF - pFB)).sum())
 
     print("\n" + "-" * 78)
-    print("  DECOMPOSIZIONE DEL DIVARIO FF vs FB (Kitagawa)")
+    print("  DECOMPOSIZIONE DEL DIVARIO FWD vs BWD (Kitagawa)")
     print("-" * 78)
     print(f"  Gruppi usati: {len(piv_n)}")
     print(f"  P(E | FF) = {P_FF:.4f}")
@@ -275,6 +279,7 @@ def select_patterns(path, per_type_top, chunksize=1_000_000):
     rows = 0
     for chunk in pd.read_csv(path, chunksize=chunksize):
         rows += len(chunk)
+        normalize_directions(chunk)
         for t, s in chunk.groupby("hourglass_type"):
             top = s.nlargest(per_type_top, "motif_count")
             best[t] = top if t not in best else \
@@ -292,7 +297,7 @@ def select_patterns_per_waist(path, top_m, chunksize=1_000_000):
 
     Serve al confronto A PARITA' DI WAIST: selezionando i top-N globali per
     tipo si finisce per confrontare regioni cerebrali diverse (i top mixed
-    stanno quasi tutti in LO/MB_ML, i top pure_FF in AL.MB_CA), non tipi di
+    stanno quasi tutti in LO/MB_ML, i top pure_FWD in AL.MB_CA), non tipi di
     motif. Qui ogni gruppo centrale fa da controllo di se stesso.
     """
     log(f"Selezione dei top {top_m} pattern per (waist, tipo) da {path}")
@@ -378,16 +383,16 @@ def within_waist_analysis(res, outdir, min_nt_score):
     piv.to_csv(os.path.join(outdir, f"waist_fracE_by_type_score{min_nt_score}.csv"))
     print(f"\n  [OUTPUT] {out}")
 
-    # scomposizione del divario pure_FF vs pure_FB
-    if "pure_FF" in piv.columns and "pure_FB" in piv.columns:
+    # scomposizione del divario pure_FWD vs pure_BWD
+    if "pure_FWD" in piv.columns and "pure_BWD" in piv.columns:
         tot = res.groupby("hourglass_type").apply(
             lambda g: np.average(g["waist_E"], weights=g["motif_count"]))
-        both = piv[["pure_FF", "pure_FB"]].dropna()
-        print("\n  [SCOMPOSIZIONE del divario pure_FF - pure_FB]")
+        both = piv[["pure_FWD", "pure_BWD"]].dropna()
+        print("\n  [SCOMPOSIZIONE del divario pure_FWD - pure_BWD]")
         print(f"    divario grezzo (tutti i waist)        : "
-              f"{tot.get('pure_FF', np.nan) - tot.get('pure_FB', np.nan):+.4f}")
+              f"{tot.get('pure_FWD', np.nan) - tot.get('pure_BWD', np.nan):+.4f}")
         print(f"    divario a parita' di waist ({len(both)} waist): "
-              f"{(both['pure_FF'] - both['pure_FB']).mean():+.4f}")
+              f"{(both['pure_FWD'] - both['pure_BWD']).mean():+.4f}")
         print("    Se il secondo e' molto minore del primo, il divario grezzo")
         print("    era un effetto di composizione regionale, non di tipo di motif.")
 

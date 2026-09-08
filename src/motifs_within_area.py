@@ -34,7 +34,7 @@ import pandas as pd
 from scipy import sparse
 from scipy.stats import spearmanr
 
-SIGS = ["FF", "lat", "FB", "mix"]
+SIGS = ["FWD", "LAT", "BWD", "mix"]
 SIGNATURES = [f"{a}->{b}" for a in SIGS for b in SIGS]
 
 
@@ -51,9 +51,9 @@ def c2(x):
 def pair_counts(n_F, n_L, n_B):
     """Numero di coppie per firma, a partire dai conteggi delle tre classi."""
     return {
-        "FF": c2(n_F),
-        "lat": c2(n_L),
-        "FB": c2(n_B),
+        "FWD": c2(n_F),
+        "LAT": c2(n_L),
+        "BWD": c2(n_B),
         "mix": n_F * n_L + n_F * n_B + n_L * n_B,
     }
 
@@ -65,7 +65,7 @@ def pairs_containing(sig, cls, n_F, n_L, n_B):
     """
     same = {"F": n_F, "L": n_L, "B": n_B}[cls]
     others = {"F": n_L + n_B, "L": n_F + n_B, "B": n_F + n_L}[cls]
-    pure = {"F": "FF", "L": "lat", "B": "FB"}[cls]
+    pure = {"F": "FWD", "L": "LAT", "B": "BWD"}[cls]
     if sig == pure:
         return np.maximum(same - 1, 0)
     if sig == "mix":
@@ -90,9 +90,9 @@ def counts_by_signature(p, q, r):
 
     # Coppie di reciproci: contributo al termine A == D
     deq = {
-        ("FF", "FB"): c2(r_lo),
-        ("lat", "lat"): c2(r_eq),
-        ("FB", "FF"): c2(r_hi),
+        ("FWD", "BWD"): c2(r_lo),
+        ("LAT", "LAT"): c2(r_eq),
+        ("BWD", "FWD"): c2(r_hi),
         ("mix", "mix"): r_lo * r_eq + r_lo * r_hi + r_eq * r_hi,
     }
 
@@ -204,7 +204,8 @@ def selftest(n_trials=300, seed=7):
         n = A.shape[0]
         Ad = A.toarray()
         def d(x, y):
-            return "FF" if lv[x] < lv[y] else ("FB" if lv[x] > lv[y] else "lat")
+            return ("FWD" if lv[x] < lv[y]
+                    else ("BWD" if lv[x] > lv[y] else "LAT"))
         def sig(ds):
             return ds[0] if ds[0] == ds[1] else "mix"
         out = Counter()

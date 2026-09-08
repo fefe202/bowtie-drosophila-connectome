@@ -5,12 +5,19 @@ Firma direzionale dei bow-tie motif.
 
 Ogni ramo del motif si classifica per accordo dei suoi archi:
 
-    signature = fanin_sig -> fanout_sig,  sig in {FF, FB, lat, mix}
+    signature = fanin_sig -> fanout_sig,  sig in {FWD, BWD, LAT, mix}
 
 dove mix indica che gli archi di quel ramo non concordano. Le firme possibili
 sono 16.
 
-La classificazione grossolana in pure_FF / pure_FB / pure_lateral / mixed e'
+Le sigle sono FWD (verso livelli piu' profondi), BWD (verso livelli piu'
+superficiali) e LAT (fra neuroni dello stesso livello). Le versioni precedenti
+usavano FF/FB/lat: FB collide con la sigla del fan-shaped body, che nel
+dataset compare in 19 gruppi anatomici, e la lettura dei risultati ne
+risentiva. I CSV gia' prodotti restano leggibili, perche' li converte
+`normalize_directions`.
+
+La classificazione grossolana in pure_FWD / pure_BWD / pure_LAT / mixed e'
 quasi vuota: con quattro archi l'accordo completo e' improbabile e il 94,4%
 dei pattern finisce in mixed. La firma fine scompone quel calderone in 13
 classi che si comportano in modo molto diverso.
@@ -23,13 +30,48 @@ from thesis_paths import results
 
 import argparse
 import os
+import re
 import time
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
 
-DIRS = ["FF", "FB", "lat"]
+FWD, BWD, LAT = "FWD", "BWD", "LAT"
+DIRS = [FWD, BWD, LAT]
+
+# Notazione precedente, ancora presente nei CSV gia' prodotti.
+_LEGACY = {"FF": FWD, "FB": BWD, "lateral": LAT, "lat": LAT}
+_LEGACY_RE = re.compile(r"(?<![A-Za-z])(FF|FB|lateral|lat)(?![A-Za-z])")
+
+# Solo queste colonne contengono direzioni: "FB" in una colonna di aree e' il
+# fan-shaped body e non va toccato.
+SIGNATURE_COLUMNS = ("signature", "fanin_sig", "fanout_sig", "hourglass_type",
+                     "direction", "tipo_A", "tipo_B", "firma")
+
+
+def normalize_directions(obj):
+    """
+    Converte la notazione FF/FB/lat in FWD/BWD/LAT.
+
+    Accetta Series, Index o DataFrame; sul DataFrame agisce sulle colonne di
+    SIGNATURE_COLUMNS e rinomina n_FF/n_FB/n_lat.
+    """
+    import pandas as pd
+
+    def conv(x):
+        return _LEGACY_RE.sub(lambda m: _LEGACY[m.group(1)], str(x))
+
+    if isinstance(obj, pd.DataFrame):
+        for c in SIGNATURE_COLUMNS:
+            if c in obj.columns:
+                obj[c] = obj[c].map(conv)
+        obj.rename(columns={"n_FF": "n_FWD", "n_FB": "n_BWD",
+                            "n_lat": "n_LAT"}, inplace=True)
+        return obj
+    if isinstance(obj, pd.Index):
+        return obj.map(conv)
+    return obj.map(conv)
 
 
 def log(msg):
@@ -38,8 +80,8 @@ def log(msg):
 
 def edge_dir(src_level, dst_level):
     """Direzione di un arco, vettorizzata."""
-    return np.where(src_level < dst_level, "FF",
-                    np.where(src_level > dst_level, "FB", "lat"))
+    return np.where(src_level < dst_level, FWD,
+                    np.where(src_level > dst_level, BWD, LAT))
 
 
 def add_signature(df, k_in, k_out):

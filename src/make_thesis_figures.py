@@ -17,6 +17,7 @@ Uso:
 """
 
 from thesis_paths import results
+from directional_signature import normalize_directions
 
 import argparse
 import os
@@ -166,10 +167,10 @@ def fig_nt_across_windows(outdir):
         if not os.path.exists(f):
             print(f"  [skip] nt_across_windows: manca {f}")
             return
-        t = pd.read_csv(f)
-        r = t[(t.tipo_A == "pure_FB") & (t.tipo_B == "pure_FF")]
+        t = normalize_directions(pd.read_csv(f))
+        r = t[(t.tipo_A == "pure_BWD") & (t.tipo_B == "pure_FWD")]
         if not len(r):
-            print(f"  [skip] nt_across_windows: nessun confronto FB/FF in {d}")
+            print(f"  [skip] nt_across_windows: nessun confronto BWD/FWD in {d}")
             return
         r = r.iloc[0]
         rows.append({"win": lab, "n": int(r.n_waist),

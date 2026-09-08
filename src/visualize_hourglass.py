@@ -3,10 +3,11 @@
 """
 Figure dei bow-tie motif.
 
-In modalita' single disegna i motif uno per uno, con i nodi disposti per
-livello gerarchico e gli archi colorati per direzione. In modalita' catalog
-produce una griglia raggruppata per firma direzionale, spezzata in piu'
-immagini: in un file unico le 14 firme davano una striscia illeggibile.
+In entrambe le modalita' l'asse verticale e' il livello gerarchico, cosi' la
+direzione di un arco si legge dalla sua inclinazione. La modalita' single
+disegna un motif per figura; la modalita' catalog produce una griglia
+raggruppata per firma direzionale, spezzata in piu' immagini perche' in un
+file unico le sedici firme danno una striscia illeggibile.
 
 Uso:
     python src/visualize_hourglass.py --input <csv> --top_n 10
@@ -15,6 +16,7 @@ Uso:
 """
 
 from thesis_paths import results
+from directional_signature import normalize_directions
 
 import pandas as pd
 import numpy as np
@@ -76,13 +78,13 @@ def get_color_for_macro(macro_area, macro_to_color):
 
 # classificazione degli archi
 def classify_edge_color(src_level, dst_level):
-    """Colore dell'arco basato sulla direzione FF/FB."""
+    """Colore dell'arco secondo la direzione rispetto ai livelli."""
     if dst_level > src_level:
-        return '#666666'  # FF: grigio scuro
+        return '#666666'  # FWD: grigio scuro
     elif dst_level < src_level:
-        return '#d62728'  # FB: rosso
+        return '#d62728'  # BWD: rosso
     else:
-        return '#1f77b4'  # Lateral: blu
+        return '#1f77b4'  # LAT: blu
 
 
 # disegno del singolo motif
@@ -218,11 +220,17 @@ def visualize_single_hourglass(row, rank, macro_to_color, output_dir,
         ax.text(label_x, y, f"L{level}",
                 fontsize=14, fontweight='bold', va='center', color='#444')
 
-    # Grid lines between levels
-    for level in list(ALL_LEVELS)[:-1]:
-        y_h = -level * spacing_y - (spacing_y / 2)
-        ax.axhline(y=y_h, color='lightgray', linestyle='--',
-                   linewidth=1, alpha=0.5, zorder=0)
+    # Bande di livello: rendono leggibile la direzione degli archi senza
+    # dover confrontare le etichette dei due nodi.
+    for level in ALL_LEVELS:
+        y = -level * spacing_y
+        ax.axhspan(y - spacing_y / 2, y + spacing_y / 2, zorder=0,
+                   facecolor='#f2f2f2' if level % 2 else '#fafafa',
+                   edgecolor='none')
+        ax.axhline(y - spacing_y / 2, color='#e2e2e2', linewidth=0.8,
+                   zorder=0)
+    ax.axhline(-max(ALL_LEVELS) * spacing_y - spacing_y / 2,
+               color='#e2e2e2', linewidth=0.8, zorder=0)
 
     # Nel titolo non si riporta lo Z-score, che non e' una misura di
     # significativita' interpretabile per questi conteggi. Al suo posto la
@@ -245,9 +253,10 @@ def visualize_single_hourglass(row, rank, macro_to_color, output_dir,
         for m in sorted(macros_in_plot)
     ]
     # Edge legend
-    legend_patches.append(mpatches.Patch(color='#666666', label='Feed-Forward'))
-    legend_patches.append(mpatches.Patch(color='#d62728', label='Feedback'))
-    legend_patches.append(mpatches.Patch(color='#1f77b4', label='Lateral'))
+    legend_patches.append(mpatches.Patch(color='#666666',
+                                        label='forward (deeper)'))
+    legend_patches.append(mpatches.Patch(color='#d62728', label='backward'))
+    legend_patches.append(mpatches.Patch(color='#1f77b4', label='lateral'))
     ax.legend(handles=legend_patches, loc='upper right', fontsize=8,
               framealpha=0.9)
 
@@ -267,20 +276,121 @@ def visualize_single_hourglass(row, rank, macro_to_color, output_dir,
 
 
 # catalogo per firma
+def level_bands(ax, levels, x0, x1, label=True):
+    """
+    Fondo a bande orizzontali, una per livello gerarchico.
+
+    Con la profondita' sull'asse verticale la direzione di un arco si legge
+    dalla sua inclinazione e non serve piu' confrontare le etichette dei due
+    nodi: un arco che scende va in avanti, uno che sale torna indietro, uno
+    orizzontale resta nello stesso livello.
+    """
+    for lv in levels:
+        y = -lv
+        ax.axhspan(y - 0.5, y + 0.5, xmin=0, xmax=1, zorder=0,
+                   facecolor="#f2f2f2" if lv % 2 else "#fafafa",
+                   edgecolor="none")
+        ax.axhline(y - 0.5, color="#e2e2e2", lw=0.6, zorder=0)
+        if label:
+            ax.text(x0 - 0.30, y, f"L{lv}", fontsize=7.5,
+                    color="#777777", ha="right", va="center", zorder=2)
+    ax.axhline(-max(levels) - 0.5, color="#e2e2e2", lw=0.6, zorder=0)
+
+
+def spread_x(base, levels_of_nodes, width=0.62):
+    """
+    Ascisse dei nodi di un ramo, a partire dalla colonna `base`.
+
+    I nodi dello stesso livello finirebbero sovrapposti, perche' l'ordinata
+    la decide il livello: quelli in collisione si separano orizzontalmente
+    dentro la propria colonna.
+    """
+    from collections import defaultdict
+    by_level = defaultdict(list)
+    for i, lv in enumerate(levels_of_nodes):
+        by_level[lv].append(i)
+    xs = [base] * len(levels_of_nodes)
+    for lv, idxs in by_level.items():
+        if len(idxs) == 1:
+            continue
+        step = width / (len(idxs) - 1)
+        for j, i in enumerate(idxs):
+            xs[i] = base - width / 2 + j * step
+    return xs
+
+
+def draw_motif_panel(ax, row, macro_to_color, levels, show_level_labels=True):
+    """Un singolo motif: ruolo sull'asse x, livello gerarchico sull'asse y."""
+    k_in, k_out = int(row["k_in"]), int(row["k_out"])
+    bl = int(row["bottleneck_level"])
+
+    in_levels = [int(row[f"fan_in_{i}_level"]) for i in range(k_in)]
+    out_levels = [int(row[f"fan_out_{i}_level"]) for i in range(k_out)]
+    in_areas = [str(row[f"fan_in_{i}_area"]) for i in range(k_in)]
+    out_areas = [str(row[f"fan_out_{i}_area"]) for i in range(k_out)]
+
+    X_IN, X_WA, X_OUT = 0.0, 1.15, 2.30
+    level_bands(ax, levels, X_IN, X_OUT, label=show_level_labels)
+
+    xs_in = spread_x(X_IN, in_levels)
+    xs_out = spread_x(X_OUT, out_levels)
+    p_wa = (X_WA, -bl)
+    p_in = [(x, -lv) for x, lv in zip(xs_in, in_levels)]
+    p_out = [(x, -lv) for x, lv in zip(xs_out, out_levels)]
+
+    for p, lv in zip(p_in, in_levels):
+        ax.annotate("", xy=p_wa, xytext=p,
+                    arrowprops=dict(arrowstyle="-|>", lw=1.6, shrinkA=8,
+                                    shrinkB=9,
+                                    color=classify_edge_color(lv, bl)))
+    for p, lv in zip(p_out, out_levels):
+        ax.annotate("", xy=p, xytext=p_wa,
+                    arrowprops=dict(arrowstyle="-|>", lw=1.6, shrinkA=9,
+                                    shrinkB=8,
+                                    color=classify_edge_color(bl, lv)))
+
+    def node(p, area, big=False):
+        # L'etichetta sta sotto il nodo: i nomi dei gruppi arrivano a undici
+        # caratteri e dentro il cerchio verrebbero tagliati.
+        ax.scatter([p[0]], [p[1]], s=340 if big else 230,
+                   c=[get_color_for_macro(get_macro_area(area),
+                                          macro_to_color)],
+                   zorder=3, edgecolors="white", linewidths=1.4)
+        ax.annotate(area, p, textcoords="offset points", xytext=(0, -11),
+                    ha="center", va="top", fontsize=6.0, zorder=4,
+                    color="#333333",
+                    fontweight="bold" if big else "normal")
+
+    for p, a in zip(p_in, in_areas):
+        node(p, a)
+    node(p_wa, str(row["bottleneck_area"]), big=True)
+    for p, a in zip(p_out, out_areas):
+        node(p, a)
+
+    ax.set_xlim(X_IN - 0.72, X_OUT + 0.62)
+    ax.set_ylim(-max(levels) - 0.62, -min(levels) + 0.62)
+    ax.set_axis_off()
+
+
 def visualize_catalog(df, macro_to_color, output_dir, max_per_type=2,
                       types_per_figure=4):
     """
     Catalogo dei motif raggruppati per FIRMA DIREZIONALE.
 
-    La disposizione e' fissa (ingressi a sinistra, waist al centro, uscite a
-    destra), cosi' i pannelli sono confrontabili fra loro. Il catalogo si
-    spezza in piu' immagini da `types_per_figure` firme ciascuna: in un file
-    unico le 14 firme danno una striscia illeggibile.
+    Le colonne danno il ruolo (ingressi a sinistra, waist al centro, uscite a
+    destra) e le righe il livello gerarchico, cosi' la struttura del motif si
+    legge dalla forma e non dalle etichette. Il catalogo si spezza in piu'
+    immagini da `types_per_figure` firme ciascuna: in un file unico le 16
+    firme danno una striscia illeggibile.
 
     Restituisce la lista dei file prodotti.
     """
     col = 'signature' if 'signature' in df.columns else 'hourglass_type'
     types = sorted(df[col].unique())
+
+    # bande comuni a tutti i pannelli: i motif restano confrontabili fra loro
+    lv_cols = ([c for c in df.columns if c.endswith("_level")])
+    levels = sorted(set(int(v) for c in lv_cols for v in df[c].dropna()))
 
     os.makedirs(output_dir, exist_ok=True)
     out_paths = []
@@ -290,7 +400,7 @@ def visualize_catalog(df, macro_to_color, output_dir, max_per_type=2,
     for part, chunk in enumerate(chunks, 1):
         n_rows = len(chunk)
         fig, axes = plt.subplots(n_rows, max_per_type,
-                                 figsize=(4.6 * max_per_type, 3.3 * n_rows),
+                                 figsize=(4.9 * max_per_type, 2.9 * n_rows),
                                  squeeze=False)
 
         for row_idx, hg_type in enumerate(chunk):
@@ -301,80 +411,27 @@ def visualize_catalog(df, macro_to_color, output_dir, max_per_type=2,
                 if col_idx >= len(subset):
                     ax.set_visible(False)
                     continue
-
                 row = subset.iloc[col_idx]
-                k_in, k_out = int(row['k_in']), int(row['k_out'])
-
-                def lab(area, level):
-                    a = str(area)
-                    if len(a) > 11:
-                        a = a[:11]
-                    return f"{a.rstrip('._')}\nL{int(level)}"
-
-                # posizioni fisse: ingressi | waist | uscite
-                def spread(n):
-                    if n == 1:
-                        return [0.5]
-                    return [i / (n - 1) for i in range(n)][::-1]
-
-                pos, colors, labels = {}, {}, {}
-                bl = int(row['bottleneck_level'])
-                pos['B'] = (1.0, 0.5)
-                colors['B'] = get_color_for_macro(
-                    get_macro_area(row['bottleneck_area']), macro_to_color)
-                labels['B'] = lab(row['bottleneck_area'], bl)
-
-                ys = spread(k_in)
-                for i in range(k_in):
-                    key = f'A{i}'
-                    pos[key] = (0.0, ys[i])
-                    colors[key] = get_color_for_macro(
-                        get_macro_area(row[f'fan_in_{i}_area']), macro_to_color)
-                    labels[key] = lab(row[f'fan_in_{i}_area'],
-                                      row[f'fan_in_{i}_level'])
-
-                ys = spread(k_out)
-                for i in range(k_out):
-                    key = f'D{i}'
-                    pos[key] = (2.0, ys[i])
-                    colors[key] = get_color_for_macro(
-                        get_macro_area(row[f'fan_out_{i}_area']), macro_to_color)
-                    labels[key] = lab(row[f'fan_out_{i}_area'],
-                                      row[f'fan_out_{i}_level'])
-
-                # archi, colorati per direzione come nelle figure singole
-                for i in range(k_in):
-                    c = classify_edge_color(int(row[f'fan_in_{i}_level']), bl)
-                    ax.annotate("", xy=pos['B'], xytext=pos[f'A{i}'],
-                                arrowprops=dict(arrowstyle='-|>', color=c,
-                                                lw=1.6, shrinkA=20, shrinkB=20))
-                for i in range(k_out):
-                    c = classify_edge_color(bl, int(row[f'fan_out_{i}_level']))
-                    ax.annotate("", xy=pos[f'D{i}'], xytext=pos['B'],
-                                arrowprops=dict(arrowstyle='-|>', color=c,
-                                                lw=1.6, shrinkA=20, shrinkB=20))
-
-                for key, (x, y) in pos.items():
-                    ax.scatter([x], [y], s=1500, c=[colors[key]],
-                               zorder=3, edgecolors='white', linewidths=1.2)
-                    ax.text(x, y, labels[key], ha='center', va='center',
-                            fontsize=6.5, zorder=4, fontweight='medium')
-
-                ax.set_xlim(-0.35, 2.35)
-                ax.set_ylim(-0.30, 1.30)
+                draw_motif_panel(ax, row, macro_to_color, levels,
+                                 show_level_labels=(col_idx == 0))
                 ax.set_title(f"#{col_idx + 1}   {int(row['motif_count']):,}",
-                             fontsize=9, fontweight='bold')
-                ax.set_axis_off()
+                             fontsize=8.5, fontweight="bold")
 
-            axes[row_idx, 0].text(-0.10, 0.5, hg_type,
+            axes[row_idx, 0].text(-0.16, 0.5, hg_type,
                                   transform=axes[row_idx, 0].transAxes,
-                                  fontsize=11, fontweight='bold',
+                                  fontsize=10.5, fontweight='bold',
                                   va='center', ha='right', family='monospace')
 
+        handles = [mpatches.Patch(color='#666666', label='forward (deeper)'),
+                   mpatches.Patch(color='#d62728', label='backward'),
+                   mpatches.Patch(color='#1f77b4', label='lateral')]
+        fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=8.5,
+                   frameon=False, bbox_to_anchor=(0.5, -0.005))
         fig.suptitle(f"Representative motifs by directional signature "
-                     f"({part}/{len(chunks)})",
-                     fontsize=13, fontweight='bold')
-        fig.tight_layout(rect=[0.02, 0, 1, 0.97])
+                     f"({part}/{len(chunks)}). "
+                     f"Depth increases downwards.",
+                     fontsize=12, fontweight='bold')
+        fig.tight_layout(rect=[0.03, 0.03, 1, 0.96])
 
         out_path = os.path.join(output_dir, f"hourglass_catalog_{part}.png")
         fig.savefig(out_path, dpi=200, facecolor='white', bbox_inches='tight')
@@ -409,7 +466,7 @@ def main():
 
     args = parser.parse_args()
 
-    df = pd.read_csv(args.input)
+    df = normalize_directions(pd.read_csv(args.input))
     if 'signature' not in df.columns and 'bottleneck_level' in df.columns:
         add_signature(df, int(df['k_in'].iloc[0]), int(df['k_out'].iloc[0]))
     df = df.sort_values(by='motif_count', ascending=False)

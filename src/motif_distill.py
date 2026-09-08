@@ -41,7 +41,7 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
-from directional_signature import add_signature
+from directional_signature import add_signature, normalize_directions
 from hourglass_areas import timestamp, format_elapsed
 
 
@@ -62,7 +62,7 @@ class Distiller:
         self.n_glob = top_global
         # Stratificazione per (waist, firma), necessaria ai confronti a
         # parita' di waist: con il solo top-per-waist le classi rare come
-        # pure_FB restano rappresentate da pochissimi pattern.
+        # pure_BWD restano rappresentate da pochissimi pattern.
         self.n_ws = top_per_waist_sig
         self.top_ws = {}
         self.agg_sig = defaultdict(lambda: [0, 0.0])      # firma -> [n, massa]
@@ -81,9 +81,8 @@ class Distiller:
         if "signature" not in df.columns:
             add_signature(df, *self.k)
         else:
-            # i CSV prodotti in momenti diversi usano 'lateral' o 'lat'
-            df["signature"] = df["signature"].astype(str).str.replace(
-                "lateral", "lat", regex=False)
+            # i CSV prodotti prima della rinomina usano FF/FB/lat
+            normalize_directions(df)
         self.n_rows += len(df)
         cnt = df["motif_count"].to_numpy(dtype=float)
         self.total_mass += float(cnt.sum())
@@ -195,7 +194,7 @@ def load(window, what):
             f"artefatto distillato mancante: {p}\n"
             f"Rilanciare la ricerca (hourglass_areas_fast.py) oppure "
             f"distillare un CSV esistente con motif_distill.py")
-    return pd.read_csv(p)
+    return normalize_directions(pd.read_csv(p))
 
 
 def main():

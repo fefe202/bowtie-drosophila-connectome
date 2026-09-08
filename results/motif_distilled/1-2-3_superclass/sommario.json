@@ -1,0 +1,16 @@
+{
+  "finestra": "1-2-3",
+  "n_pattern": 29091,
+  "massa_totale": 17585056392.0,
+  "k_in": 2,
+  "k_out": 2,
+  "n_waist": 20,
+  "n_firme": 16,
+  "top_per_firma": 200,
+  "top_per_waist": 20,
+  "top_globale": 1000,
+  "top_per_waist_firma": 10,
+  "n_celle_waist_firma": 204,
+  "max_jump": 1,
+  "min_count": 10
+}

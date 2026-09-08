@@ -28,6 +28,7 @@ import numpy as np
 import pandas as pd
 
 from thesis_paths import results
+from directional_signature import normalize_directions
 
 
 # Etichette in italiano o inglese, scelte con --lang.
@@ -197,9 +198,10 @@ def signature_figure():
     if not os.path.exists(f):
         print("  [skip] manca il sommario delle firme")
         return
-    d = pd.read_csv(f).sort_values("pct_pattern", ascending=True)
-    highlight = {"FF->FB": "#d62728", "FB->FF": "#ff7f0e",
-                 "FB->FB": "#9467bd", "FF->FF": "#2ca02c"}
+    d = normalize_directions(pd.read_csv(f))
+    d = d.sort_values("pct_pattern", ascending=True)
+    highlight = {"FWD->BWD": "#d62728", "BWD->FWD": "#ff7f0e",
+                 "BWD->BWD": "#9467bd", "FWD->FWD": "#2ca02c"}
     colors = [highlight.get(s, "#bbbbbb") for s in d["signature"]]
 
     fig, axes = plt.subplots(1, 2, figsize=(9.5, 5), sharey=True)
@@ -221,7 +223,9 @@ def nt_figure():
     if not os.path.exists(f):
         print("  [skip] mancano i risultati sui neurotrasmettitori")
         return
-    d = pd.read_csv(f, index_col=0).reindex(["FF", "lateral", "FB"])
+    d = pd.read_csv(f, index_col=0)
+    d.index = normalize_directions(d.index)
+    d = d.reindex(["FWD", "LAT", "BWD"])
     cols = [c for c in ["E", "I", "M", "U"] if c in d.columns]
     pct = d[cols].div(d[cols].sum(axis=1), axis=0) * 100
     palette = {"E": "#d62728", "I": "#1f77b4", "M": "#9467bd", "U": "#cccccc"}
@@ -235,8 +239,9 @@ def nt_figure():
         left += pct[c].to_numpy()
     ax.set_xlabel(T("nt_x"))
     ax.set_xlim(0, 100)
-    ax.legend(fontsize=8, ncol=2, loc="lower center",
-              bbox_to_anchor=(0.5, -0.42))
+    ax.legend(fontsize=8, ncol=4, loc="upper center",
+              bbox_to_anchor=(0.5, -0.24), frameon=False,
+              columnspacing=1.1, handlelength=1.4)
     ax.set_title(T("nt_title"),
                  fontsize=10, fontweight="bold")
     save(fig, "nt_by_direction.png")
