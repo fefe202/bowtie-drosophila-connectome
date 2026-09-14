@@ -10,19 +10,31 @@ standard, e ogni gruppo e' o un neuropilo singolo (44 gruppi) o una coppia
 scritta col punto (584 gruppi). ME e' un neurone confinato nella medulla,
 ME.LO un neurone che arborizza sia nella medulla sia nella lobula.
 
-I 44 neuropili si raggruppano a loro volta nelle super-regioni della
-nomenclatura di Ito et al. (2014), che sono tredici. Questo da' una terza
-granularita', fra le 9 superclassi funzionali e i 628 gruppi anatomici:
-79 categorie e 309 metanodi, contro i 24 delle superclassi e i 1.698 dei
-gruppi.
+Provenienza delle due parti, che sono diverse e vanno tenute distinte.
+
+  - I 44 neuropili e le loro sigle **vengono dal dataset**. La colonna
+    `neuropil` di connections.csv contiene esattamente gli stessi 44 nomi
+    nella forma con suffisso emisferico (ME_L, ME_R, ...), e i token della
+    colonna `group` di neurons.csv sono esattamente quei 44. Non e' una lista
+    inventata, ed e' `--selftest` a ricontrollarlo sui dati.
+
+  - Il raggruppamento in 13 super-regioni **non e' un campo del dataset**:
+    nessun file lo contiene. E' la gerarchia della nomenclatura di Ito et al.
+    (2014), codificata qui a mano. E' la parte da verificare contro la tabella
+    dei neuropili di FlyWire Codex prima di difenderla in sede di discussione.
+
+Il raggruppamento da' una terza granularita', fra le 9 superclassi funzionali
+e i 628 gruppi anatomici: 79 categorie e 309 metanodi, contro i 24 delle
+superclassi e i 1.698 dei gruppi.
 
 Uso come libreria:
 
     from neuropil_taxonomy import superregion_of_group, NEUROPILS
 
-Uso da riga di comando, per la tabella dei neuropili della tesi:
+Uso da riga di comando:
 
-    python src/neuropil_taxonomy.py --table
+    python src/neuropil_taxonomy.py --table       # tabella dei 44 neuropili
+    python src/neuropil_taxonomy.py --selftest    # verifica contro i dati
 """
 
 from thesis_paths import data
@@ -140,14 +152,62 @@ def neuropil_counts():
     return out
 
 
+def selftest():
+    """
+    Verifica che l'elenco dei neuropili sia quello del dataset.
+
+    Controlla due cose contro i file di input: che i 44 codici di NEUROPILS
+    siano esattamente quelli della colonna `neuropil` di connections.csv una
+    volta tolto il suffisso emisferico, e che ogni token della colonna `group`
+    di neurons.csv sia fra quelli noti. Il raggruppamento in super-regioni non
+    e' verificabile qui, perche' non compare in nessun file: quello resta una
+    codifica della nomenclatura di Ito et al. (2014).
+    """
+    import re
+
+    ok = True
+    npl = pd.read_csv(data("connections.csv"), usecols=["neuropil"])
+    npl = npl["neuropil"].dropna().unique()
+    base = {re.sub(r"_(L|R)$", "", x) for x in npl}
+    mine = set(NEUROPILS)
+    print(f"  neuropili in connections.csv: {len(base)}   "
+          f"in NEUROPILS: {len(mine)}")
+    for label, diff in (("solo nei dati", base - mine),
+                        ("solo nel modulo", mine - base)):
+        if diff:
+            ok = False
+            print(f"  [FALLITO] {label}: {sorted(diff)}")
+
+    g = pd.read_csv(data("neurons.csv"), usecols=["group"])["group"].dropna()
+    g = g[g != "NO_CONS"]
+    tok = {t for x in g.unique() for t in tokens(x)}
+    print(f"  token usati dalla colonna group: {len(tok)}")
+    if not tok <= mine:
+        ok = False
+        print(f"  [FALLITO] token sconosciuti: {sorted(tok - mine)}")
+
+    n_sr = len({sr for _, sr in NEUROPILS.values()} - {"UNK"})
+    print(f"  super-regioni codificate: {n_sr}   "
+          f"(non verificabili sui dati: nessun file le contiene)")
+    print("\n  " + ("OK: l'elenco dei neuropili coincide con il dataset"
+                    if ok else "ALCUNI CONTROLLI SONO FALLITI"))
+    return ok
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Tabella dei neuropili e delle super-regioni.")
     ap.add_argument("--table", action="store_true",
                     help="stampa la tabella dei 44 neuropili")
+    ap.add_argument("--selftest", action="store_true",
+                    help="verifica l'elenco dei neuropili contro i dati")
     ap.add_argument("--latex", default=None,
                     help="scrive la tabella in un file .tex")
     a = ap.parse_args()
+
+    if a.selftest:
+        import sys
+        sys.exit(0 if selftest() else 1)
 
     n = neuropil_counts()
     rows = []
@@ -161,8 +221,10 @@ def main():
 
     if a.table or not a.latex:
         print(t.to_string(index=False))
-        print(f"\nneuropili: {len(t)}   super-regioni: "
-              f"{t['superregion'].nunique()}")
+        # UNASGD non e' una regione: e' l'etichetta dei neuroni non assegnati
+        real = t[t["superregion"] != "UNK"]["superregion"].nunique()
+        print(f"\nneuropili: {len(t)}   super-regioni: {real}"
+              f"   (piu' UNK, per i neuroni non assegnati)")
 
     if a.latex:
         lines = []

@@ -20,6 +20,7 @@ Uso:
 import argparse
 import json
 import os
+import re
 
 import matplotlib
 matplotlib.use("Agg")
@@ -42,7 +43,7 @@ STRINGS = {
         "h_title": "Effetto hourglass: piu' debole che in C. elegans",
         "cov_x": "neuroni nel core, in ordine di path centrality",
         "cov_y": "frazione di cammini sensoriale-motorio coperti",
-        "cov_title": r"Copertura cumulativa  ({tot:.3g} cammini $S\rightarrow T$)",
+        "cov_title": r"Copertura cumulativa  ({tot:,.0f} cammini $S\rightarrow T$)",
         "cov_note": "{c} neuroni\ncoprono il 90%",
         "null_lab": "{n} reti randomizzate",
         "null_real": "rete reale: H = {h:.3f}",
@@ -71,7 +72,7 @@ STRINGS = {
         "h_title": "Hourglass effect across coverage thresholds",
         "cov_x": "neurons in the core, ordered by path centrality",
         "cov_y": "fraction of sensory-to-motor paths covered",
-        "cov_title": r"Cumulative coverage  ({tot:.3g} paths $S\rightarrow T$)",
+        "cov_title": r"Cumulative coverage  ({tot:,.0f} paths $S\rightarrow T$)",
         "cov_note": "{c} neurons\ncover 90% of paths",
         "null_lab": "{n} randomised networks",
         "null_real": "real network: H = {h:.3f}",
@@ -259,13 +260,17 @@ def compression_figure():
     fig, ax = plt.subplots(figsize=(5.6, 4))
     ax.scatter(d["n_waist_efficace"], d["compressione_realizzata"],
                s=14, alpha=0.35, color="#7f7f7f", edgecolors="none")
-    for w, col in (("AL.MB_CAL2", "#d62728"), ("AL.LHL2", "#ff7f0e"),
-                   ("ME.LOL3", "#1f77b4")):
+    # I dati chiamano il metanodo <gruppo>L<livello>; la tesi lo scrive
+    # <gruppo>_L<livello>. In legenda va la forma della tesi.
+    for w, col in (("ME.LOL3", "#1f77b4"),):
         s = d[d["waist"] == w]
-        if len(s):
-            ax.scatter(s["n_waist_efficace"], s["compressione_realizzata"],
-                       s=42, color=col, label=w, zorder=5, edgecolors="white",
-                       linewidths=0.5)
+        if not len(s):
+            # senza questo avviso un waist inesistente sparisce in silenzio
+            print("  [attenzione] nessun punto per il waist %r" % w)
+            continue
+        ax.scatter(s["n_waist_efficace"], s["compressione_realizzata"],
+                   s=42, color=col, label=re.sub(r"(L\d+)$", r"_\1", w),
+                   zorder=5, edgecolors="white", linewidths=0.5)
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel(T("cmp_x"))

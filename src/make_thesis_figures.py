@@ -113,9 +113,12 @@ def fig_signature_shift(outdir, load):
     ax.set_title("The deep brain is laterally dominated", fontsize=11,
                  fontweight="bold")
     ax.set_xlim(0, 46)
-    # evidenzia le firme con un ramo puramente laterale
+    # Evidenzia le firme con un ramo interamente laterale. Il confronto va
+    # fatto sui rami: "LAT" dentro la stringa e "LAT" come ramo coincidono
+    # per costruzione, ma la forma esplicita non si rompe se la notazione
+    # cambia di nuovo.
     for i, s in enumerate(m["signature"]):
-        if "lat" in s:
+        if "LAT" in str(s).split("->"):
             ax.axhspan(i - 0.45, i + 0.45, color="#f5f0e6", zorder=0)
     save(fig, "signature_shift.png", outdir)
 
@@ -184,7 +187,8 @@ def fig_nt_across_windows(outdir):
     ax.barh(y, df.gap, color=cols, height=0.55)
     ax.axvline(0, color="black", lw=1.2)
     ax.set_yticks(y, df.win)
-    ax.set_xlabel("excitatory-fraction gap  (pure FF minus pure FB), "
+    # FF/FB erano la notazione vecchia: la tesi dice pure_FWD / pure_BWD
+    ax.set_xlabel("excitatory-fraction gap  (pure_FWD minus pure_BWD), "
                   "at parity of waist")
     # annotazioni allineate a destra: in fondo alla barra quelle negative
     # collidono con le etichette dell'asse
@@ -219,7 +223,8 @@ def fig_micro_macro(outdir):
         if len(r):
             ax.scatter(r.total_motif_count, r.coverage, s=64, color=C_DEEP,
                        zorder=5, edgecolors="white", linewidths=1.0)
-            ax.annotate(f"{g} L{lv}",
+            # il metanodo si scrive GRUPPO_L<livello>, come nel testo
+            ax.annotate(f"{g}_L{lv}",
                         (r.total_motif_count.iloc[0], r.coverage.iloc[0]),
                         textcoords="offset points", xytext=(7, 4), fontsize=8.5)
     ax.set_xscale("log")

@@ -3,7 +3,8 @@
 %
 %  Sorgente in un file unico. Si compila con pdfLaTeX; la bibliografia e'
 %  in fondo, non serve un .bib separato.
-%  I dati da completare prima della consegna sono marcati con TODO.
+%  Non restano campi da completare: frontespizio, anno accademico e
+%  bibliografia sono tutti definitivi.
 
 \documentclass[12pt,a4paper,oneside]{article}
 
@@ -77,7 +78,8 @@
 \centering
 \vspace*{1.5cm}
 
-% \includegraphics[width=0.45\textwidth]{unical_logo.png}\\[1.2cm]  % TODO: add logo
+% il logo e' quadrato: dato in larghezza sarebbe alto quasi 7 cm
+\includegraphics[height=3cm]{logo.png}\\[1.2cm]
 
 {\scshape\Large University of Calabria\par}
 \vspace{0.4cm}
@@ -109,7 +111,7 @@ Candidate:\\[0.3cm]
 \end{minipage}
 
 \vfill
-{\scshape Academic Year 2025/2026\par} % TODO: confirm
+{\scshape Academic Year 2025/2026\par}
 \end{titlepage}
 
 \clearpage
@@ -152,6 +154,9 @@ Signature\\[1.4cm]
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
 \markboth{ABSTRACT}{ABSTRACT}
+% due righe in piu' su questa pagina: senza, l'abstract sborda e quelle due
+% righe si prendono da sole la pagina successiva
+\enlargethispage{2\baselineskip}
 
 Understanding how cognitive functions emerge from the physical wiring of the
 brain is one of the central challenges of modern neuroscience. The recent
@@ -183,11 +188,15 @@ a sparse reformulation, and verified row by row against an independent
 reference implementation. The third is empirical: an analysis of all four
 level windows of the hierarchy rather than a single one, which reveals that
 the architecture changes qualitatively with depth, with signatures involving
-a purely lateral branch growing from $20.1\%$ to $76.2\%$ of the motif mass.
-The fourth is methodological: a negative result, in which an apparent
-neurochemical difference between feedback and feed-forward waists proves not
-to survive replication across independent windows and is traced to regional
-composition.
+a purely lateral branch growing from $38.0\%$ to $82.6\%$ of all motif
+instances.
+The fourth is methodological: a hypothesis carried through to the point
+where it can be tested rather than asserted. An apparent neurochemical
+difference between backward and forward waists is significant on the shallow
+window, is traced there to regional composition, and does not replicate
+across the remaining windows; it is therefore reported as an open question
+about the optic lobe rather than as a property of the connectome, together
+with the procedure that established the distinction.
 
 The hourglass effect is present but depends on how paths are routed, with a
 score of $0.498$ under structural routing against values between $0.74$ and
@@ -266,7 +275,7 @@ neurons at a time, a connectome provides the entire network at once, which
 permits computational analyses at a scale and resolution that were
 previously out of reach. The adult \Drosophila{} brain has emerged as the
 premier model organism for this pursuit: it contains only about
-$130{,}000$ neurons, some five orders of magnitude fewer than the human
+$140{,}000$ neurons, some five orders of magnitude fewer than the human
 brain, and yet supports a behavioural repertoire spanning visual pursuit,
 olfactory learning, sleep regulation and courtship \cite{lin2024}.
 
@@ -330,8 +339,9 @@ is entirely infeasible at that scale. What is required instead is a counting
 formulation that produces exact occurrence counts without ever materialising
 an individual match. Such formulations do exist, but they do not exist for
 every pattern, and the conditions under which they apply have to be
-established rather than assumed. Chapter~\ref{sec:methods} shows that the
-condition is a property of the shape of the pattern and nothing else.
+established rather than assumed. The condition turns out to be a property of
+the shape of the pattern and nothing else: a count factorises when the
+pattern contains no cycle, and does not when it contains one.
 
 The second sub-problem concerns the relationship between two different ways
 of asking the same question. Motif counting is inherently local: it measures
@@ -349,10 +359,12 @@ Anatomical regions of the fly brain differ systematically in size, in
 connection density and in neurotransmitter composition. Any apparent
 difference between two classes of motifs may therefore reflect merely
 \emph{where} those motifs happen to live rather than \emph{what} they are.
-Controlling for regional composition is essential, and as
-Section~\ref{sec:results-nt} demonstrates in detail, failing to replicate
-such a control across independent subsets of the data can produce results
-that look convincingly significant and are not.
+Controlling for regional composition is essential, and so is repeating the
+controlled comparison on data that did not suggest the hypothesis in the
+first place. This thesis contains a case in which a controlled effect held
+on one subset of the data, reversed on another and disappeared on the whole,
+which is a pattern that looks convincingly significant at every stage until
+the last one.
 
 \subsection{Research Objectives}
 \label{sec:objectives}
@@ -381,7 +393,7 @@ The fourth objective is to test structural hypotheses with adequate
 controls. This means evaluating the statistical significance of the observed
 motifs against several complementary null models rather than one, and
 testing biological hypotheses about the waists, in particular whether
-feedback and feed-forward waists differ in neurotransmitter composition,
+backward and forward waists differ in neurotransmitter composition,
 with explicit controls for regional composition and with replication across
 independent level windows.
 
@@ -390,9 +402,11 @@ independent level windows.
 
 The theoretical contribution of this thesis is an exact characterisation of
 when motif counts compose, developed in Section~\ref{sec:pattern-algebra}.
-Counting occurrences of a pattern means counting homomorphisms from that
-pattern into the graph, and both the cost of doing so and the way counts
-combine depend only on the shape of the pattern. Paths admit a pure matrix
+Counting occurrences of a pattern means counting the ways it can be laid
+over the graph, that is, the ways of assigning a neuron to each node of the
+pattern so that every edge of the pattern lands on an edge of the graph;
+these assignments are called \emph{homomorphisms}. Both the cost of counting
+them and the way counts combine depend only on the shape of the pattern. Paths admit a pure matrix
 product and their counts add across unions of node groups; trees require an
 element-wise product at every branching node and their counts do not add;
 cyclic patterns cannot be factorised over vectors at all. The boundary
@@ -413,18 +427,24 @@ The empirical contribution is an analysis across all four level windows of
 the hierarchy, presented in Section~\ref{sec:results-windows}. Previous work
 on this connectome has concentrated on a single window. Extending the
 analysis to all four shows that the structure changes qualitatively with
-depth: signatures involving a purely lateral branch carry $20.1\%$ of the
-motif mass in the shallow window and $76.2\%$ in the deep one, and the
+depth: signatures involving a purely lateral branch account for $38.0\%$ of
+all motif instances in the shallow window and $82.6\%$ in the deep one, and
+the
 deepest level of the hierarchy turns out to be the most internally dense
 while remaining marginal as a waist.
 
-The methodological contribution is a negative result, established properly
-rather than quietly dropped, and reported in
-Section~\ref{sec:results-nt}. The hypothesis that feedback waists carry a
-distinct neurochemical signature is significant on one window, reverses sign
-on another, and vanishes on the full connectome. The apparent effect is
-traced to regional segregation, and the procedure that exposed it is
-described in enough detail to be reused.
+The methodological contribution is a hypothesis pursued to the point where
+the data can decide it, reported in Section~\ref{sec:results-nt}. The
+hypothesis is that backward waists carry a distinct neurochemical signature,
+and it is a natural one: inhibition is widely associated with feedback
+control. It is significant on the shallow window, reverses sign on the
+second and does not hold on the full connectome, and the reason is
+identified: the two classes of motif sit in different brain regions, whose
+neurochemistry differs. What survives is a narrower and better specified
+claim about the medulla, stated as a hypothesis for future work, together
+with the three-step procedure that separated it from the broader one. The
+procedure is the transferable part, and it is described in enough detail to
+be reused.
 
 \subsection{Thesis Outline}
 \label{sec:outline}
@@ -442,10 +462,39 @@ work.
 %=======================================================================
 \section{Theoretical Background}
 \label{sec:background}
+
+This chapter assembles the four things the rest of the thesis needs, in the
+order in which they become necessary.
+
+It begins with the graph formalism and the matrix representation of a
+network, which is what turns questions about connectivity into arithmetic
+that a computer can do at this scale. It then describes the connectome
+itself: what FlyWire measured, how its neurons are ordered along a
+sensory-to-motor axis, what the anatomical labels mean, and how neurons are
+grouped so that the search space becomes finite. It introduces network
+motifs, the notion that recurring small patterns are the building blocks of
+a network, and the classification of those patterns by direction that this
+thesis relies on. Finally it sets out the bow-tie and the hourglass, which
+are the two objects the whole analysis is about, and explains why they are
+not the same thing even though the literature often uses the words
+interchangeably.
+
+That last distinction organises everything that follows. A \emph{bow-tie} is
+a local pattern: a few groups converging on one and then diverging again. An
+\emph{hourglass} is a global property: the whole network routing its traffic
+through a narrow set of intermediaries. A network can have many of the first
+without being the second, which is why this thesis measures both and then
+asks whether they agree.
 %=======================================================================
 
 \subsection{Fundamentals of Network Science}
 \label{sec:network-science}
+
+
+Two things are needed before the connectome can be discussed at all: a
+language for describing networks, and a representation that makes
+computation on them possible. This section provides both, and neither is
+developed further than the rest of the thesis actually uses.
 
 \subsubsection{Graph Formalism}
 
@@ -472,32 +521,68 @@ implement a given architecture, the unweighted graph is the correct object.
 
 \subsubsection{Matrix Representations}
 
-The adjacency matrix $A \in \{0,1\}^{|V| \times |V|}$ has $A_{uv} = 1$ if
-and only if $(u,v) \in E$. For a connectome of $134{,}181$ neurons a dense
-representation of this matrix would occupy more than $18$\,GB at one byte
-per entry, whereas the graph contains only $2{,}700{,}513$ edges, a density
-below $1.5 \times 10^{-4}$. Sparse representations, and in particular the
-Compressed Sparse Row format, are therefore not an optimisation but a
-prerequisite for working with the data at all.
+A graph can equally well be written as a matrix, and doing so is what makes
+the analysis in this thesis possible, so it is worth setting out both the
+representation and the one identity that is used throughout.
 
-The reason the matrix representation matters for this thesis is a single
-identity. The number of directed paths of length $k$ running from a set of
-neurons $S$ to a set of neurons $T$ is given by
+The \emph{adjacency matrix} $A \in \{0,1\}^{|V| \times |V|}$ records the
+edges in a table: the entry $A_{uv}$ is $1$ if the edge $(u,v)$ is present
+and $0$ otherwise. Written out in full this table is unusable at connectome
+scale. With $134{,}181$ neurons it has more than $18$ billion entries,
+occupying over $18$\,GB at one byte each, while the graph actually contains
+$2{,}700{,}513$ edges: fewer than one entry in six thousand is non-zero.
+Storing only the non-zero entries, as the Compressed Sparse Row format does,
+is therefore not an optimisation but a precondition for holding the data in
+memory at all, and every matrix in this thesis is stored that way.
+
+The reason the representation matters, beyond storage, is that it turns a
+question about connectivity into a multiplication. Consider the product
+$A^2$. Its entry $(A^2)_{uv}$ is $\sum_w A_{uw} A_{wv}$, and each term of
+that sum is $1$ exactly when there is an edge from $u$ to $w$ and one from
+$w$ to $v$, that is, when $w$ is an intermediate step on a two-edge route
+from $u$ to $v$. The sum therefore counts those routes. The same argument
+applied repeatedly gives the general form: the number of directed paths of
+length $k$ from a set of neurons $S$ to a set of neurons $T$ is
 \begin{equation}
   \label{eq:path-count}
   \mathbf{1}_S^{\top} A^k \, \mathbf{1}_T ,
 \end{equation}
-where $\mathbf{1}_S$ is the indicator vector of the set $S$. What makes this
-useful is that the expression need never be evaluated by forming $A^k$,
-which would be dense and enormous. Instead one propagates a vector through
-$k$ successive sparse matrix--vector products, at a cost of
-$O(k \cdot |E|)$ time and $O(|V|)$ memory. An entire class of counting
-problems thus becomes linear in the size of the network.
-Section~\ref{sec:pattern-algebra} establishes precisely how far this
-identity extends, and where it stops.
+where $\mathbf{1}_S$ is the indicator vector of $S$, the vector with a $1$
+in the position of every neuron in $S$ and $0$ elsewhere. Counting paths, an
+apparently combinatorial task, has become a matrix expression.
+
+The practical value of this lies in how the expression is evaluated. Forming
+$A^k$ explicitly would be hopeless, since even $A^2$ is far denser than $A$
+and $A^3$ denser still. But the expression never needs to be evaluated that
+way: one starts from the vector $\mathbf{1}_S$ and multiplies it by $A$
+repeatedly, obtaining after each multiplication a vector whose entry at
+neuron $v$ is the number of paths of that length reaching $v$. Only one
+vector of $|V|$ numbers is ever held, and each multiplication touches each
+edge once, so the whole computation costs $O(k \cdot |E|)$ time and
+$O(|V|)$ memory instead of the cube of the number of neurons. An entire
+class of counting problems thereby becomes linear in the size of the
+network, and this vector, propagated step by step, is what
+Section~\ref{sec:counting} will call the \emph{flow vector}.
+
+Two cautions belong here. The identity counts \emph{walks} rather than
+paths, since a route that visits the same neuron twice is included, and in a
+graph with cycles the distinction is not cosmetic: the number of walks grows
+without bound as their permitted length increases. And the trick works
+because a chain is a sequence with no branches, so it does not carry over
+unchanged to patterns that branch, which is the problem
+Chapter~\ref{sec:methods} takes up.
 
 \subsection{The \Drosophila{} Connectome}
 \label{sec:connectome}
+
+
+This section describes the object of study. It covers why the fruit fly is
+the organism for which this analysis is possible at all, what the FlyWire
+dataset contains, how its neurons are ordered along an axis running from
+sensory input to motor output, what the anatomical labels mean, and how
+neurons are grouped so that an exhaustive search becomes finite. The last two
+are the choices on which every later result depends, and they are argued for
+rather than assumed.
 
 \subsubsection{A Model Organism for Structural Analysis}
 
@@ -505,12 +590,13 @@ The adult \Dros{} brain occupies a favourable position in the space of model
 organisms. It is small enough to have been reconstructed completely at
 synaptic resolution, which no vertebrate brain has been, and yet complex
 enough to support behaviour that is not trivially reflexive. With
-approximately $130{,}000$ neurons it retains sensory integration,
+approximately $140{,}000$ neurons it retains sensory integration,
 associative learning and memory, so that structural findings about it are
 plausibly informative about principles that generalise, rather than being
 peculiarities of a simple nervous system.
 
 \subsubsection{The FlyWire Dataset}
+\label{sec:dataset}
 
 The data used in this work derive from the FlyWire reconstruction of the
 adult female brain \cite{lin2024}, distributed through the Codex portal.
@@ -518,15 +604,44 @@ Four tables are used. The first lists synaptic pairs with their contact
 counts, already filtered at a threshold of five synapses in the public
 export, which removes the least reliable segmentation artefacts. The second
 gives neuron identifiers together with their anatomical group assignment and
-their predicted neurotransmitter. The third provides functional super-class
-labels, distinguishing sensory, optic, central, descending and visual
-projection neurons. The fourth supplies the hierarchical level assignment
-described below.
+their predicted neurotransmitter, discussed below. The third provides
+functional \emph{super-class} labels, which sort neurons by the role they
+play rather than by where they sit: sensory, optic, central, descending and
+five others, set out in full in Section~\ref{sec:groups}. The fourth
+supplies the hierarchical level assignment described below.
 
-After restricting the data to neurons that possess both a level assignment
-and a non-degenerate anatomical group, the working network comprises
-$134{,}181$ neurons and $2{,}700{,}513$ de-duplicated synaptic pairs. All
+The tables cover $139{,}255$ neurons. After restricting the data to those
+that possess both a level assignment and a non-degenerate anatomical group,
+the working network comprises $134{,}181$ neurons and $2{,}700{,}513$
+de-duplicated synaptic pairs. All
 figures reported in this thesis refer to that restricted network.
+
+The neurotransmitter annotation requires a word of its own, since
+Section~\ref{sec:results-nt} depends on it entirely and it is the one field
+in the dataset that is inferred rather than observed. A neuron's
+neurotransmitter cannot be read off an electron micrograph directly; FlyWire
+assigns it with a classifier trained on the appearance of the synapses
+themselves, and each assignment carries a confidence score. Six
+neurotransmitters occur in the working network: acetylcholine, in $82{,}298$
+neurons, glutamate in $19{,}605$, GABA in $16{,}017$, and the three
+modulators serotonin, dopamine and octopamine in a further $1{,}677$
+together.
+
+These are grouped into three functional classes, plus a fourth for the
+uncertain. Acetylcholine is the principal \emph{excitatory} transmitter of
+the insect brain, making the receiving neuron more likely to fire. GABA and
+glutamate are treated as \emph{inhibitory}, making it less likely; the
+second of these is worth flagging, because glutamate is excitatory in
+vertebrates and it is specifically in insects that it acts through a
+chloride channel and inhibits. Serotonin, dopamine and octopamine are
+\emph{modulatory}: rather than exciting or inhibiting directly they change
+how other connections behave. Finally, any neuron whose prediction carries a
+confidence below $0.5$ is treated as \emph{unknown} and excluded from the
+excitatory and inhibitory counts rather than guessed at. Applying that
+threshold leaves $82.2\%$ of the working network classified: $57.0\%$
+excitatory, $24.3\%$ inhibitory, $0.9\%$ modulatory and $17.8\%$ unknown.
+That last figure is not negligible, and Section~\ref{sec:results-nt} states
+where it bears on the conclusions.
 
 \subsubsection{Hierarchical Levels}
 \label{sec:levels}
@@ -537,28 +652,68 @@ To provide such a notion, each neuron is assigned a discrete hierarchical
 level $y \in \{1,\dots,5\}$ reflecting its position along the axis running
 from sensory input to motor output. Level~1 contains the neurons closest to
 the sensory periphery and level~5 those closest to motor output. The level
-assignment used here is taken as given from earlier work on this dataset;
-this thesis does not re-derive it, but it does validate it independently in
-Section~\ref{sec:results-hierarchy}, where the functional composition of the
-levels is shown to follow the expected gradient.
+assignment used here is taken as given from earlier work on this dataset and
+is not re-derived. It is, however, examined from two directions:
+Section~\ref{sec:results-hierarchy} reports what the levels turn out to
+contain, and Section~\ref{sec:results-coherence} asks whether they remain
+informative under the grouping this thesis actually uses, which is not the
+one they were built for.
 
 Because everything that follows is conditioned on these levels, it is worth
-stating how they were obtained. The assignment proceeds in two steps. A
-spectral embedding of the connectome first places every neuron on a
-continuous axis, so that neurons receiving from many others and projecting to
-few sit towards one end and the reverse towards the other; this yields a real
-number per neuron rather than a discrete label. A decision tree then
-discretises that axis into five bins, choosing the cut points so as to
-separate the functional super-classes as cleanly as possible. The levels are
-therefore not arbitrary quantiles: their boundaries are placed where the
-biological composition of the population changes.
+stating how they were obtained. The assignment proceeds in two steps.
+
+A spectral embedding of the connectome first places every neuron on a
+continuous axis. The method is called spectral because the positions are
+obtained from the eigenvectors of a matrix built from the connectivity,
+rather than from any property of the individual neurons; concretely, the
+construction minimises an energy that penalises edges running backwards
+along the axis, so that a neuron receiving from few others
+and projecting to many is pushed towards one end and a neuron in the opposite
+situation towards the other. The output is a real number for each neuron,
+which we will call its \emph{flow score}, and not yet a level: it is a
+position on a line, with no natural place to draw a boundary.
+
+The second step draws those boundaries. A decision tree is fitted to the flow
+score with the functional super-class as the target, and the thresholds it
+selects become the level boundaries. Because the tree is choosing the cuts
+that best separate sensory from optic from central from motor neurons, the
+boundaries are placed where the biological composition of the population
+changes rather than at arbitrary quantiles. Four cuts produce five levels,
+at flow scores $29.8$, $-1.5$, $-13.5$ and $-25.4$, and
+Figure~\ref{fig:level-construction} shows both the tree and where its cuts
+fall on the population.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{level_construction.png}
+\caption[How the hierarchical levels are constructed]{How the five levels are
+obtained. Above, the decision tree: because all four thresholds apply to the
+same quantity, the tree is a comb in which each test peels off one level and
+passes the remainder to the next, and the percentages are the share of the
+$134{,}181$ neurons falling in each. Below, the same four cuts drawn on the
+distribution of the flow score itself, with the score increasing to the left
+so that the sensory end of the axis is on the left and the motor end on the
+right; the bars at the extremes collect the tails, which run to $906$ and
+$-306$. The two central levels are the populous ones, and the cut between
+them falls almost exactly on the peak of the distribution.}
+\label{fig:level-construction}
+\end{figure}
+
+Two things are worth noticing in that figure, because they explain results
+that appear later. The distribution is heavily concentrated near the middle
+of the axis, so levels~2 and~3 together hold $68\%$ of the neurons, and the
+boundary between them cuts through the densest part of the population rather
+than through a gap. Neither fact is a defect of the construction: a
+continuous axis has no gaps to cut at, which is precisely why a criterion
+external to the geometry, namely the super-class, is needed to place the
+boundaries at all.
 
 This has a consequence that matters for the next section. Since the cut
 points were chosen to separate super-classes, levels and super-classes are
 not independent, and pairing them is in one sense the natural thing to do.
 This thesis nevertheless groups neurons more finely, for reasons set out in
-Section~\ref{sec:groups} and tested empirically in
-Section~\ref{sec:results-granularity}.
+Section~\ref{sec:groups}, and the cost of that choice is measured rather
+than assumed.
 
 Once levels are available, every edge acquires a direction relative to the
 hierarchy. For an edge running from a neuron at level $y_u$ to a neuron at
@@ -587,10 +742,13 @@ fan-shaped body, a neuropil of the central complex, and it occurs in nineteen
 of the anatomical groups set out in Section~\ref{sec:nomenclature}; it also
 appears in this thesis, in Table~\ref{tab:within-null}, as an area rather
 than as a direction. A reader who meets \code{BWD->FWD} without the glossary at
-hand has no way of telling which of the two is meant. The directions are
-therefore written \code{FWD}, \code{BWD} and \code{LAT} throughout, which
-collide with nothing, and the anatomical abbreviations keep their usual
-meaning.
+hand has no way of telling which of the two is meant. The abbreviations used
+for directions are therefore \code{FWD}, \code{BWD} and \code{LAT}, which
+collide with nothing, and the anatomical codes keep their usual meaning. In
+running text the three are called forward, backward and lateral; the terms
+\emph{feed-forward} and \emph{feedback} are kept for the general notions as
+they appear in the literature, and are not used as names for the classes
+measured here.
 
 \subsubsection{The Anatomical Nomenclature}
 \label{sec:nomenclature}
@@ -604,8 +762,8 @@ The insect brain is divided into \emph{neuropils}, dense regions of
 synaptic connections separated by tracts of fibres, and the standard
 nomenclature of Ito et al.\ \cite{ito2014} assigns each one a short
 uppercase code. FlyWire annotates every neuron with the set of neuropils in
-which it arborises, and this annotation is the \code{group} field of the
-dataset. The field has $628$ distinct values, which sounds unmanageable
+which it \emph{arborises}, that is, in which its branches spread out and make
+synapses, and this annotation is the \code{group} field of the dataset. The field has $628$ distinct values, which sounds unmanageable
 until one sees how they are built. There are only $44$ distinct neuropils in
 the annotation, and a group is either a single neuropil, of which there are
 $44$, or a pair of neuropils written with a dot between them, of which there
@@ -613,9 +771,28 @@ are $584$. No group names more than two. So \code{ME} is a neuron confined to
 the medulla, \code{LO} one confined to the lobula, and \code{ME.LO} a neuron
 that arborises in both and therefore connects them; \code{AL.MB\_CA} spans
 the antennal lobe and the mushroom body calyx, which is the anatomical
-signature of an olfactory projection neuron. Reading a group name is thus a
+signature of an olfactory \emph{projection neuron}, a neuron whose branches
+span two regions and which therefore carries signals from one to the other.
+Reading a group name is thus a
 matter of reading at most two codes, and the dot should be understood as
 ``and'', not as a hierarchy.
+
+Three of these neuropils deserve a word on their own, because they carry
+most of the results reported later. The \emph{medulla}, the \emph{lobula} and
+the \emph{lobula plate} are three successive stages of the optic lobe: light
+is transduced in the retina, passes to the lamina and then to the medulla,
+which is the largest neuropil in the brain and performs the first substantial
+visual computation; from there information splits into two parallel streams,
+one reaching the lobula, associated with the analysis of form and features,
+and one reaching the lobula plate, which is the stage specialised for
+detecting motion. A pattern such as \code{ME.LO} therefore names a neuron
+bridging two consecutive stages of this pathway, and a circuit running from
+medulla groups through the lobula to the lobula plate is a circuit moving
+from early visual processing into motion analysis. The olfactory counterpart
+is the chain from the \emph{antennal lobe}, which receives input from the
+smell receptors, to the \emph{mushroom body}, the centre for olfactory
+learning, and the \emph{lateral horn}, which mediates innate rather than
+learned responses to odours.
 
 The $44$ neuropils are themselves organised into thirteen \emph{super-regions}
 in the same nomenclature, and this grouping is the macro-level of the
@@ -630,7 +807,19 @@ unfamiliar code without consulting an atlas, and they define a third
 granularity, intermediate between the nine functional super-classes and the
 $628$ groups, which Section~\ref{sec:results-granularity} uses as a control.
 
-\begin{table}[H]
+The two halves of this description have different standing, and it is worth
+separating them. The neuropil codes themselves are carried by the data: the
+per-synapse annotation of the connection table names the same forty-four
+regions, in hemisphere-resolved form, and the tokens appearing in the
+\code{group} field are exactly those. The assignment of neuropils to
+super-regions, by contrast, is not a field of the dataset at all; it is the
+hierarchy of the published nomenclature, applied here. Nothing in the data
+would reveal an error in it, so it is stated as a convention taken from
+\cite{ito2014} rather than as a measurement.
+
+% [t] e non [H]: con [H] la tabella non entrava nella pagina in corso e la
+% spezzava, lasciando tre quarti di pagina bianchi prima di lei
+\begin{table}[t]
 \centering
 \caption[The 44 neuropils of the annotation]{The $44$ neuropils that compose
 the \code{group} annotation, grouped by super-region and ordered by
@@ -752,11 +941,37 @@ instantiations of that pattern. This preserves the quantity that actually
 matters, namely how many real circuits realise the pattern, while reducing
 the search space by several orders of magnitude.
 
-Which categorisation to use is a real choice, and three are available. The
-coarsest is the \emph{super-class}, a functional label carried by the FlyWire
-classification and taking nine values: \emph{optic}, \emph{central},
-\emph{sensory}, \emph{descending}, \emph{ascending}, \emph{motor},
-\emph{endocrine}, \emph{visual projection} and \emph{visual centrifugal}. The
+Two quantities derived from these counts are used throughout the results and
+are worth naming now, because they answer different questions and frequently
+disagree. The \emph{number of patterns} in a set is how many distinct
+metanode configurations it contains, each counted once however often it
+occurs. The \emph{mass} of that set is the sum of the counts of its patterns,
+that is, the total number of neuron-level circuits realising any of them. A
+class of motifs may contain very many distinct patterns that are each rare,
+giving it a large number of patterns and a small mass, or a handful of
+patterns that are each realised enormously often, giving the reverse. Both
+are reported wherever the two diverge, and percentages are stated as shares
+of one or the other, never of an unspecified total.
+
+Which categorisation to use is a real choice, and three are available.
+
+The coarsest is the \emph{super-class}, a functional label carried by the
+FlyWire classification and taking nine values. Since these names recur
+throughout the results, and since three of them concern the visual system
+specifically and are easy to confuse, they are set out here.
+\emph{Sensory} neurons carry signals into the brain from the sense organs.
+\emph{Optic} neurons lie within the optic lobe, the large visual region that
+occupies most of each side of the head, and process visual input locally.
+\emph{Visual projection} neurons carry visual information \emph{out} of the
+optic lobe towards the central brain, and \emph{visual centrifugal} neurons
+run the other way, carrying signals from the central brain back \emph{into}
+the optic lobe. \emph{Central} neurons lie in the central brain and are
+neither sensory nor motor: this is where association, learning and
+decision-making happen. \emph{Descending} neurons carry commands out of the
+brain towards the nerve cord that drives the body, \emph{ascending} neurons
+carry signals up from the nerve cord into the brain, \emph{motor} neurons
+drive muscles directly, and \emph{endocrine} neurons release hormones rather
+than acting on a specific target. The
 finest is the \emph{anatomical group} of Section~\ref{sec:nomenclature},
 which takes $628$ values. Between them sits the \emph{super-region}, obtained
 by replacing each neuropil of a group with the super-region that contains it,
@@ -775,9 +990,12 @@ This thesis uses the \emph{anatomical group}. The reason is that the question
 being asked is which \emph{structure} occupies the waist, and the super-class
 label cannot express an answer to it: the category \emph{central} alone
 collapses $521$ distinct anatomical groups into one node. The antennal lobe
-projection neurons, the Kenyon cells of the mushroom body and the mushroom
-body output neurons are all, without exception, \emph{central}; so is the
-lateral horn. Any statement about how information is routed within the
+projection neurons, which carry odour information from the antennal lobe to
+the mushroom body; the Kenyon cells, which are the numerous small neurons
+forming the body of the mushroom body itself and on which odour memories are
+stored; and the mushroom body output neurons, which read that structure out
+towards behaviour, are all, without exception, \emph{central}; so is the
+lateral horn.  Any statement about how information is routed within the
 central brain is therefore unavailable at that granularity, by construction
 rather than by accident.
 
@@ -816,6 +1034,15 @@ difference in resolution between the two.}
 \subsection{Network Motifs}
 \label{sec:motifs}
 
+
+A motif is a small connectivity pattern that occurs more often than chance
+would predict. This section defines the idea, explains why the comparison
+against chance is part of the definition rather than an afterthought, and
+introduces the scheme by which the patterns of this thesis are classified
+according to the direction their edges run in the hierarchy. That
+classification is used continuously from here on, so it is developed in full
+here rather than where the results first need it.
+
 \subsubsection{Motifs as Building Blocks}
 
 Milo et al.\ \cite{milo2002} introduced network motifs as patterns of
@@ -851,19 +1078,64 @@ output branch. The resulting label is written
 which yields sixteen possible signatures. A motif labelled
 \code{FWD->LAT}, for instance, is one in which two groups feed forward onto a
 waist that then distributes laterally within its own level.
+Figure~\ref{fig:signature-grid} draws all sixteen.
 
-A coarser classification was used in earlier work on this dataset. It labels
-a motif \emph{pure\_FWD}, \emph{pure\_BWD} or \emph{pure\_LAT} when all
-four of its edges agree, and \emph{mixed} otherwise. As
-Section~\ref{sec:results-signature} shows quantitatively, this coarse label
-turns out to be close to vacuous: with four edges, complete agreement is
-improbable, and $94.4\%$ of all patterns consequently fall into the
-\emph{mixed} bucket. The sixteen-signature scheme resolves that bucket into
-classes that behave very differently from one another, and much of the
-analysis in this thesis depends on the finer resolution.
+% [H] e non [t]: e' troppo alta per stare in cima a una pagina, quindi come
+% float verrebbe rimandata fino in fondo al documento. La coda bianca sulla
+% pagina precedente e' il prezzo da pagare per tenerla dove la si cita.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{signature_grid.png}
+\caption[The sixteen directional signatures]{The sixteen signatures, laid
+out as a matrix: the row gives the direction of the input branch and the
+column that of the output branch. Depth increases downwards, so the
+direction of a branch can be read from the slope of its arrows, and a
+\emph{mix} branch is drawn with one arrow of each kind. Beneath each cell
+are the shares of motif mass in the shallow and deep windows, from
+Table~\ref{tab:signatures}. The shaded cells are the seven signatures in
+which at least one branch is entirely lateral; the contrast between their
+two numbers is the shift reported in
+Section~\ref{sec:results-signature}.}
+\label{fig:signature-grid}
+\end{figure}
+
+It is worth being explicit about why the signature is defined at this level
+of detail rather than more simply, because the alternative was tried first
+and does not work.
+
+The obvious classification, and the one used in earlier work on this dataset,
+labels a motif by the agreement of all four of its edges at once: a motif is
+\emph{pure\_FWD}, \emph{pure\_BWD} or \emph{pure\_LAT} when every edge runs
+the same way, and \emph{mixed} otherwise. The difficulty is arithmetic. Four
+edges each running in one of three directions give $81$ possible
+combinations, of which only three have all four in agreement, so complete
+agreement is improbable before one looks at any data at all. On the shallow
+window the outcome is what that arithmetic predicts: $29{,}453{,}022$
+patterns, $94.4\%$ of the total, fall into \emph{mixed}, while
+\emph{pure\_LAT} takes $1{,}651{,}892$ ($5.3\%$), \emph{pure\_FWD}
+$57{,}821$ ($0.19\%$) and \emph{pure\_BWD} only $22{,}065$ ($0.07\%$). A
+label that assigns nineteen patterns in twenty to a single class is not
+telling us much about the connectome; it is telling us that four independent
+things rarely agree.
+
+The signature of Equation~\eqref{eq:signature} avoids this by asking for
+agreement within each branch separately rather than across the motif as a
+whole. Two edges agree far more often than four, so the classes it produces
+are populated rather than empty, and the thirteen classes hiding inside
+\emph{mixed} turn out to behave very differently from one another. This is
+why the finer scheme is used throughout, and why the coarse label appears in
+this thesis only where a comparison with earlier work requires it.
 
 \subsection{Bow-Tie and Hourglass Architecture}
 \label{sec:hourglass-theory}
+
+
+This section defines the two structures the thesis is about and separates
+them, because the literature often does not. The bow-tie is a local pattern
+and is defined precisely enough to be counted; the hourglass is a global
+property of a network and is defined precisely enough to be measured. The
+distinction is what makes it meaningful to ask, later, whether the two
+agree.
 
 \subsubsection{The Bow-Tie Motif}
 
@@ -887,8 +1159,7 @@ configuration in which a group feeds back into itself through the waist.
 Such configurations are extremely numerous, because the same group
 reappearing on both sides multiplies the available combinations, and they
 are also degenerate in the sense that they do not describe convergence
-followed by divergence. As reported in Section~\ref{sec:results-windows},
-enforcing the constraint removes $6.60\%$ of the patterns but $57.3\%$ of
+followed by divergence. Enforcing the constraint removes $6.60\%$ of the patterns but $57.3\%$ of
 the total count mass, which gives a measure of how strongly degenerate
 configurations dominate when the search is left unconstrained.
 
@@ -963,7 +1234,7 @@ which is the signature of an hourglass. A value close to $0$ means that the
 apparent concentration is entirely explained by the dependencies themselves
 and that the hierarchy contributes nothing.
 
-\subsection{Related Work}
+\subsection{Previous Work}
 \label{sec:related}
 
 Two recent theses prepared under the same supervision analyse the same
@@ -985,21 +1256,62 @@ makes exact counting through a closed formulation possible where enumeration
 would not be. It pairs the local analysis with a global hourglass
 measurement and then quantifies the agreement between the two rather than
 reporting either in isolation. And it treats statistical validation and
-negative results as first-class outputs, on the view that an analysis whose
-controls are not reported cannot be assessed by a reader.
+the fate of unconfirmed hypotheses as first-class outputs, on the view that
+an analysis whose controls are not reported cannot be assessed by a reader.
 
-Earlier work on this connectome \cite{corradini2025} treated the brain as a
-flat homogeneous graph and enumerated motifs without conditioning on
-hierarchical position at all, which produces useful global statistics but
-collapses together circuits operating at very different processing stages.
+Earlier work on the larval connectome of the same species
+\cite{corradini2025} treated the brain as a flat homogeneous graph and
+enumerated motifs without conditioning on hierarchical position at all,
+which produces useful global statistics but collapses together circuits
+operating at very different processing stages. The present work uses the
+adult connectome, in which the number of neurons is larger by an order of
+magnitude, so the contrast is one of method rather than a direct
+comparison of results.
 
 %=======================================================================
 \section{Methods}
 \label{sec:methods}
+
+The two questions of the previous chapter are answered at two different
+scales, and this chapter describes the machinery for both, in the order in
+which the results are later presented: the global question first, then the
+local one.
+
+The order matters and is worth justifying. Asking which structures form
+waists only makes sense once one knows whether the network has an hourglass
+organisation at all; and a measurement of that global organisation is
+interpretable on its own, whereas a catalogue of local patterns is not,
+since any large network contains many patterns of any given shape. The
+global analysis therefore comes first and sets the terms, the local one then
+identifies the structures responsible, and Section~\ref{sec:results-bridge}
+compares what the two say about the same tissue.
+
+Both rest on the same foundation, which is why it is described before either.
+Section~\ref{sec:counting} develops a way of counting how many times a
+pattern occurs without ever enumerating its occurrences, by exploiting the
+fact that a count over a branching pattern factorises into a product over
+the point where the branches meet. That single idea is applied twice: to the
+waist of a bow-tie, where it gives the number of local patterns, and to a
+node of the whole network, where it gives the number of sensory-to-motor
+paths through it. The chapter then covers the statistical validation that
+distinguishes a motif from a merely frequent pattern, the engineering that
+makes an exhaustive count feasible, and the checks that establish that the
+counts are right.
 %=======================================================================
 
 \subsection{Counting Without Enumeration}
 \label{sec:counting}
+
+
+Everything in this thesis rests on being able to count occurrences of a
+pattern without listing them, because at connectome scale the occurrences
+number in the hundreds of billions and listing them is not an option. This
+section develops that capability in four steps: it recasts pattern counting
+as a linear-algebraic operation, extends it from chains to branching
+patterns, establishes exactly which patterns the extension covers, and
+verifies the resulting formulae against brute-force enumeration. The fourth
+step also fixes the limits of the method, which are as important to state as
+its reach.
 
 \subsubsection{Homomorphism Counting and Flow Vectors}
 
@@ -1062,6 +1374,31 @@ coincidence on a single neuron; the sum aggregates over the waist. It is
 from this structure that the formulation takes its name, \sigmapi{}, and it
 is exact: no approximation and no sampling are involved anywhere.
 
+Figure~\ref{fig:sigmapi} works a small example through in full. The left
+panel isolates one waist neuron and draws its actual connections, so that
+the four factors can be read off by counting arrows; the right panel repeats
+those four numbers for every waist neuron and sums the products. Two things
+are worth noticing. The arithmetic never constructs a bow-tie: it multiplies
+four counts per waist neuron, of which there are at most a few thousand,
+where the bow-ties themselves number in the billions. And a single zero
+anywhere in a column removes that neuron from the total, which is the
+observation the pruning of Section~\ref{sec:pruning} exploits.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{sigmapi_scheme.png}
+\caption[How the bow-tie count factorises]{How the count of a bow-tie
+factorises over the waist. On the left, a single waist neuron $i_1$, with the
+neurons of each group that actually connect to it drawn in colour and the
+rest greyed out: two neurons of $A_1$ project onto it, one of $A_2$, and it
+projects onto one neuron of $D_1$ and two of $D_2$, so
+$2 \times 1 \times 1 \times 2 = 4$ distinct bow-ties are centred on this
+neuron. On the right, the same four counts for every neuron of the waist,
+their products, and the sum that gives the count of the pattern. Nothing in
+the procedure builds an individual bow-tie.}
+\label{fig:sigmapi}
+\end{figure}
+
 \subsubsection{The Algebra of Patterns}
 \label{sec:pattern-algebra}
 
@@ -1081,6 +1418,23 @@ If $P$ is \emph{cyclic}, its count is not factorisable over vectors at all,
 and a matrix must be maintained, requiring $O(n^2)$ memory.
 \end{proposition}
 
+Figure~\ref{fig:pattern-algebra} puts the three cases side by side.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{pattern_algebra.png}
+\caption[The three classes of pattern]{The three classes of
+Proposition~\ref{prop:algebra}, with what each costs to count. A path is a
+chain with no branching: its count is a matrix product and, being linear, it
+adds across unions of groups. A tree branches but contains no cycle: the
+branching forces an element-wise product, which keeps the memory linear but
+destroys additivity, and the bow-tie of this thesis is exactly such a case.
+A cyclic pattern admits no factorisation over vectors at all. The counts
+beneath each panel are the connected four-node patterns of each kind, from
+Table~\ref{tab:pattern-catalogue}.}
+\label{fig:pattern-algebra}
+\end{figure}
+
 The practical consequence is that the boundary between the cheap and the
 expensive is exactly the presence of branching, and that a second boundary,
 between the feasible and the infeasible at connectome scale, is the presence
@@ -1097,7 +1451,7 @@ composing them? The answer is that composition works along the chain and
 fails at the junction, and the junction is precisely where \sigmapi{}
 becomes necessary.
 
-\subsubsection{How Much Ground the Method Covers}
+\subsubsection{Pragmatic Proof}
 \label{sec:algebra-coverage}
 
 Proposition~\ref{prop:algebra} classifies patterns, but it does not by
@@ -1141,13 +1495,180 @@ classification itself does not depend on pattern size, so the qualitative
 conclusion carries, but the percentages beyond four nodes are not measured
 here. Furthermore, the classification concerns homomorphisms, whereas the
 requirement that the participating neurons all be distinct is a separate
-layer of inclusion--exclusion sitting on top of the count. The two should
+layer sitting on top of the count, handled by \emph{inclusion--exclusion}:
+one counts without the restriction, then subtracts the cases in which two
+nodes coincide, then adds back those subtracted twice, and so on. The two should
 not be conflated: factorisability is a property of the shape of the pattern,
 whereas node distinctness is a property of the kind of count one wishes to
 perform.
 
+\subsection{Macro-Scale Analysis: the \texorpdfstring{$\tau$}{tau}-Core}
+\label{sec:macro-methods}
+
+The bow-tie search of the previous section asks a local question: which
+groups of neurons form convergent--divergent patterns, and how often. It
+cannot, by construction, answer the global one. A network can be full of
+local bow-ties without being an hourglass overall, if each of those bow-ties
+routes a different part of the traffic and none of them is on the path of
+everything else; and conversely a network could funnel all of its traffic
+through a handful of neurons that never appear in any frequent local
+pattern. The two questions are independent, and the second is the one the
+architecture literature actually asks.
+
+This section describes how it is answered. The idea, taken from Sabrin and
+Dovrolis \cite{sabrin2020}, is to stop looking at patterns and start looking
+at \emph{paths}. If the network really is an hourglass, then a small set of
+nodes must lie on almost all the routes from the sensory periphery to the
+motor output, and removing that set must disconnect almost everything.
+Measuring how small that set is, and comparing it against how small it would
+have to be in a network with the same inputs and outputs but no intermediate
+structure at all, gives a single number for how hourglass-like the
+architecture is. Three definitions are needed to make this precise: the
+centrality of a node with respect to paths, the minimal set that covers a
+given fraction of them, and the reference against which its size is judged.
+
+\subsubsection{Path Centrality and the \texorpdfstring{$\tau$}{tau}-Core}
+\label{sec:taucore-def}
+
+Fix a set of sources $S$ and a set of targets $T$, and let $\Pi$ be the set
+of paths from some source to some target. The \emph{path centrality} of a
+node $v$ is the number of those paths that pass through it,
+\begin{equation}
+  \label{eq:path-centrality}
+  P(v) = \bigl| \{\pi \in \Pi : v \in \pi\} \bigr|.
+\end{equation}
+This is computed without enumerating any path. Writing $a_h(v)$ for the
+number of paths of exactly $h$ hops from a source to $v$, and $b_h(v)$ for
+the number of $h$-hop paths from $v$ to a target, both obtained by
+propagating along the layers of the routing, the centrality of $v$ under a
+bound $H$ on path length is
+\begin{equation}
+  \label{eq:centrality-factorised}
+  P(v) = \sum_{h_1 + h_2 \le H} a_{h_1}(v)\, b_{h_2}(v),
+\end{equation}
+which is the same factorisation over a meeting point that
+Equation~\eqref{eq:sigmapi} uses for the waist of a bow-tie. The macro and
+micro analyses therefore rest on the same algebra, applied once to a pattern
+and once to a whole network.
+
+For a set of nodes $X$, let $\pi(X)$ denote the fraction of paths in $\Pi$
+that pass through at least one member of $X$. The \emph{$\tau$-core} is the
+smallest set covering a fraction $\tau$ of all paths,
+\begin{equation}
+  \label{eq:taucore}
+  C(\tau) = \operatorname*{arg\,min}_{X \subseteq V} |X|
+  \quad \text{subject to} \quad \pi(X) \ge \tau .
+\end{equation}
+Finding the smallest such set exactly is an instance of \emph{set cover},
+the problem of choosing the fewest sets that between them cover everything,
+which is NP-hard: no algorithm is known that solves it exactly in time
+polynomial in the size of the input, and at this scale an exact search is
+out of the question. The core is therefore built greedily, as in the
+original work: at each step the node of highest
+path centrality is added to the core and its paths are removed, and the
+centralities are recomputed on what remains. Throughout this thesis
+$\tau = 0.9$, so the core is the smallest set of neurons that carries nine
+tenths of the sensory-to-motor traffic.
+
+\subsubsection{The Flat Reference and the Hourglass Score}
+\label{sec:hscore-def}
+
+The size of $C(\tau)$ is not interpretable on its own, because it depends on
+how many sources and targets the network has. A network with ten thousand
+sensory neurons will need a large core simply to touch all of them, hourglass
+or not. What is needed is a reference: how large would the core have to be in
+a network that has the same sources, the same targets and the same
+source-to-target dependencies, but no intermediate structure through which to
+share them?
+
+That reference is the \emph{flat dependency network} $G_f$, which retains
+only the sources and the targets and joins each pair $(s,t)$ by a single edge
+whenever a path from $s$ to $t$ exists in the original network. Every path in
+$G_f$ has length one, so no node can ever lie on the route of another pair,
+and covering a fraction $\tau$ of the dependencies requires naming the
+sources and targets themselves. Writing $C_f(\tau)$ for the core of the flat
+network, computed by the same greedy procedure, the \emph{hourglass score} is
+\begin{equation}
+  \label{eq:hscore}
+  H = 1 - \frac{|C(\tau)|}{|C_f(\tau)|}, \qquad H \in [0, 1).
+\end{equation}
+The interpretation follows directly from the definition. If the network
+routes its traffic through a narrow waist, then $|C(\tau)|$ is far smaller
+than $|C_f(\tau)|$ and $H$ approaches one. If it has no shared intermediate
+structure, the two cores are of comparable size and $H$ approaches zero. The
+score therefore measures not whether a network has a bottleneck in absolute
+terms, but how much narrower its bottleneck is than the flat network its own
+inputs and outputs would force. Figure~\ref{fig:flat-reference} shows the
+comparison on a sketch small enough to check by eye.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{flat_reference.png}
+\caption[The flat reference and the hourglass score]{Why the size of the
+core has to be judged against a reference. On the left, a network in which
+every route from a source to a target passes through one of two intermediate
+nodes: naming those two covers everything, so the core has size two. On the
+right, the flat dependency network built from the same sources and targets,
+in which each dependent pair is joined directly. No node there lies on any
+other pair's route, so covering the dependencies requires naming an entire
+side, six nodes. The hourglass score is one minus the ratio of the two, and
+it is large exactly when the real network shares intermediate structure that
+the flat one cannot.}
+\label{fig:flat-reference}
+\end{figure}
+
+\subsubsection{Sources, Targets and Routing}
+
+The sources $S$ are taken to be the sensory neurons, of which there are
+$12{,}711$, and the targets $T$ the motor and descending neurons, of which
+there are $1{,}382$. Computing path centrality then requires a decision
+about which paths are to be counted, and this decision matters more than it
+might appear.
+
+Two routing schemes are used. Under \code{levels} routing, a path may only
+traverse edges that do not decrease the hierarchical level. This makes the
+routing acyclic by construction, so that path counts are finite without any
+further restriction, at the cost of discarding every lateral edge; because
+the acyclicity comes from the structure of the hierarchy itself rather than
+from an imposed bound, this scheme is referred to as \emph{structural
+routing} wherever the results are discussed. Under \code{score} routing, paths follow a
+continuous flow score which recovers part of the lateral connectivity, with
+an explicit bound imposed on the length of admissible paths. Since almost
+$39\%$ of all edges in this connectome are lateral, the difference between
+the two
+schemes is substantial and both are reported throughout.
+
+\subsubsection{Why the Path Length Bound Is Mandatory}
+
+The bound $H$ on path length in Equation~\eqref{eq:centrality-factorised}
+was introduced without comment, and it deserves one, because it is not a
+computational convenience but a condition for the centrality to be defined
+at all.
+
+In a cyclic graph the number of source-to-target paths diverges
+combinatorially with the permitted path length, since paths may wander
+through cycles arbitrarily many times. As the count diverges, the ordering
+of nodes by path centrality degenerates, because a single well-connected
+neuron appears on an overwhelming proportion of the increasingly baroque
+paths. Section~\ref{sec:results-macro} quantifies exactly how bad this
+becomes. The bound on path length is therefore not a computational
+convenience that could be relaxed given more resources, but a definitional
+requirement without which the measure has no content.
+
 \subsection{Micro-Scale Analysis: Bow-Tie Motif Search}
 \label{sec:micro-methods}
+
+
+Where the previous section asked whether the network as a whole funnels its
+traffic, this one asks which structures do the funnelling. The object counted
+is the bow-tie of Definition~\ref{def:bowtie}, over metanodes rather than
+neurons, and the counting uses the \sigmapi{} formulation of
+Section~\ref{sec:sigmapi} directly.
+
+Three things have to be settled before a search can be run: which
+configurations are admissible, how the space of candidates is cut down
+enough to make an exhaustive pass feasible, and how the resulting waists are
+compared with one another. This section takes them in that order.
 
 \subsubsection{Search Space and Parameters}
 
@@ -1187,8 +1708,12 @@ same direction, since each pattern then constrains six edges rather than
 four.
 
 A genuine implementation limit applies only to the parameter sweep of
-Section~\ref{sec:results-sweep}, which avoids enumerating combinations by
-evaluating an elementary symmetric polynomial. That shortcut admits an exact
+Section~\ref{sec:results-sweep}. That sweep avoids enumerating combinations
+by evaluating an \emph{elementary symmetric polynomial}: given a list of
+numbers, the $k$-th such polynomial is the sum of all products of $k$ of
+them taken at a time, which is exactly the quantity a sum over all
+$k$-combinations of groups requires, and which can be computed without
+forming a single combination. That shortcut admits an exact
 disjointness correction only for the pure forms $(k,1)$ and $(1,k)$; the
 general case $(k,k)$ with $k \ge 3$ would require inclusion--exclusion to a
 depth this implementation does not reach.
@@ -1245,41 +1770,25 @@ neuron carries everything, both sums are dominated by that neuron and
 $\neff$ tends to one. Section~\ref{sec:results-compression} shows what
 difference the correction makes to the ranking of waists in practice.
 
-\subsection{Macro-Scale Analysis: the \texorpdfstring{$\tau$}{tau}-Core}
-\label{sec:macro-methods}
-
-\subsubsection{Sources, Targets and Routing}
-
-The sources $S$ are taken to be the sensory neurons, of which there are
-$12{,}711$, and the targets $T$ the motor and descending neurons, of which
-there are $1{,}382$. Computing path centrality then requires a decision
-about which paths are to be counted, and this decision matters more than it
-might appear.
-
-Two routing schemes are used. Under \code{levels} routing, a path may only
-traverse edges that do not decrease the hierarchical level, which makes the
-routing structurally acyclic and therefore well behaved, at the cost of
-discarding every lateral edge. Under \code{score} routing, paths follow a
-continuous flow score which recovers part of the lateral connectivity, with
-an explicit bound imposed on the length of admissible paths. Since almost
-$39\%$ of all edges in this connectome are lateral, as
-Section~\ref{sec:results-hierarchy} reports, the difference between the two
-schemes is substantial and both are reported throughout.
-
-\subsubsection{Why the Path Length Bound Is Mandatory}
-
-In a cyclic graph the number of source-to-target paths diverges
-combinatorially with the permitted path length, since paths may wander
-through cycles arbitrarily many times. As the count diverges, the ordering
-of nodes by path centrality degenerates, because a single well-connected
-neuron appears on an overwhelming proportion of the increasingly baroque
-paths. Section~\ref{sec:results-macro} quantifies exactly how bad this
-becomes. The bound on path length is therefore not a computational
-convenience that could be relaxed given more resources, but a definitional
-requirement without which the measure has no content.
-
 \subsection{Statistical Validation}
 \label{sec:validation-methods}
+
+
+A pattern that occurs frequently is not thereby a motif. Large networks
+contain enormous numbers of every small pattern simply because they are
+large and because some neurons have very many connections, and a count on
+its own cannot distinguish structure from that background. The comparison
+against randomised networks is therefore not a check applied at the end but
+part of what the word motif means, as Section~\ref{sec:motifs} noted.
+
+The difficulty is that there is no single correct randomisation. Each choice
+of what to preserve and what to destroy tests a different explanation, and a
+pattern can be significant against one and unremarkable against another; this
+thesis reports a case where the ordering of patterns inverts between two of
+them. Three null models are therefore used rather than one, and this section
+describes them, the way significance is assessed given the shape of the
+resulting distributions, and how the size of an effect is reported once
+significance is established.
 
 \subsubsection{Three Complementary Null Models}
 
@@ -1290,22 +1799,53 @@ generate an apparent excess of bow-ties, we use three null models, each of
 which destroys a different aspect of the observed structure while preserving
 the others.
 
-The first, which we call model A, is the degree-preserving null of Milo et
-al.\ \cite{milo2002,maslov2002}. It rewires the network through repeated
-edge swaps that leave the in-degree and out-degree of every neuron
-unchanged. It therefore preserves the degree sequences exactly and destroys
-the anatomy completely, so that a pattern which remains over-represented
-under it cannot be explained by degree alone. The second, model B, preserves
-regional structure instead: edges are resampled independently within each
-pair of anatomical groups at the observed density of that block, so that the
-connection density between any two regions is retained while individual
-degrees are destroyed. The third, model C, is the strictest of the three.
-Within each block it permutes the assignment of degrees to individual
-neurons, thereby preserving both the number of edges and the per-block
-degree sequences, and randomising only \emph{which} waist neuron receives
-which degree. Model C consequently isolates the coincidence structure at the
-waist from everything else, which is exactly the property a bow-tie count
-depends on.
+The three are the following.
+
+\begin{itemize}
+  \item \textbf{Model A, degree-preserving.} The classical null of Milo et
+    al.\ \cite{milo2002,maslov2002}. The network is rewired through repeated
+    edge swaps that leave the in-degree and out-degree of every neuron
+    unchanged. It preserves the degree sequences exactly and destroys the
+    anatomy completely, so a pattern still over-represented under it cannot
+    be explained by degree alone.
+
+  \item \textbf{Model B, block-density-preserving.} Edges are resampled
+    independently within each pair of anatomical groups, at the density
+    observed for that pair. It preserves how strongly any two regions are
+    connected and destroys individual degrees, so it tests whether a pattern
+    is explained by regional connectivity alone.
+
+  \item \textbf{Model C, degree permutation within blocks.} The strictest of
+    the three. Within each block the assignment of degrees to individual
+    neurons is permuted, preserving both the number of edges and the
+    per-block degree sequences, and randomising only \emph{which} waist
+    neuron receives which degree. It leaves everything intact except the
+    coincidence structure at the waist, which is precisely the property a
+    bow-tie count depends on.
+\end{itemize}
+
+The three are therefore nested in strictness rather than alternative to one
+another, and a pattern that survives all three has been shown not to follow
+from degree, from regional density, or from the way degree is distributed
+within a region. Figure~\ref{fig:null-models} shows what each one does to a
+small network.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{null_models.png}
+\caption[What each null model preserves and destroys]{The three null models
+applied to the same small network, whose ten nodes belong to two anatomical
+regions shown in two colours. The size of a node is its degree and the edges
+that run between the two regions are drawn in orange, so the two properties
+each model is concerned with are both visible. Model A keeps every degree
+but scatters the edges across regions, and the count of crossing edges rises
+sharply. Model B keeps the number of crossings and randomises the degrees.
+Model C keeps both and permutes only which node within a region carries
+which degree, which is why it is the strictest of the three: what it
+randomises is precisely the coincidence structure a bow-tie count depends
+on.}
+\label{fig:null-models}
+\end{figure}
 
 \subsubsection{Inference}
 
@@ -1346,6 +1886,16 @@ another, which settles the matter.
 
 \subsection{Computational Realisation}
 \label{sec:engine}
+
+
+The formulation of Section~\ref{sec:counting} makes an exhaustive count
+possible in principle. Making it possible in practice, on a network of
+$134{,}181$ neurons, required three pieces of engineering, and they are
+described here because the analysis of the deeper windows would not have
+been feasible without them: a reformulation of the inner loop as a matrix
+product, a sparse variant for the cases where the dense form does not fit in
+memory, and a decision about what to keep of an output that would otherwise
+run to hundreds of gigabytes.
 
 \subsubsection{The Matrix Engine}
 
@@ -1464,17 +2014,48 @@ agreement.
 %=======================================================================
 \section{Results}
 \label{sec:results}
+
+The results follow the same path as the methods: from the whole network
+inwards.
+
+They open with the hierarchy on which everything else is conditioned,
+establishing what the five levels contain and how densely they are wired,
+and then testing whether that hierarchy remains meaningful when neurons are
+grouped by anatomy rather than by function. With the axis established, the
+global question is asked: does this connectome route its traffic through a
+narrow waist, and how does the answer compare with the one obtained for
+\textit{C.\ elegans}. The analysis then descends to the local scale, where
+the exhaustive motif search across four level windows identifies which
+structures actually form those waists, how the picture changes with depth,
+and how much the choice of anatomical granularity determines what can be
+seen. The two scales are then compared directly against each other.
+
+The remaining sections take up questions that either scale raises on its own:
+whether the counts survive randomisation, what the neurochemistry of the
+waists is, how the picture changes when the shape of the pattern is allowed
+to vary from integrative to broadcast, what happens inside a single
+anatomical area, and what the whole analysis costs to run.
 %=======================================================================
 
 \subsection{Hierarchical Structure of the Connectome}
 \label{sec:results-hierarchy}
+
+
+Everything that follows is conditioned on the five hierarchical levels, so
+the first thing to establish is what they contain and how they are wired to
+one another. This section reports the size and functional composition of
+each level, the density of connections between them, and the balance of
+forward, backward and lateral edges. The last of these turns out to matter
+for the macro-scale analysis, which discards a substantial fraction of the
+edges depending on how paths are routed.
 
 \subsubsection{Level Sizes and Composition}
 
 Since the level assignment is inherited rather than derived here, the first
 thing to establish is that it means what it is supposed to mean.
 Table~\ref{tab:levels} reports how the neurons are distributed across the
-five levels together with the functional composition of each level.
+five levels together with the functional composition of each level, and
+Figure~\ref{fig:level-composition} shows the same two quantities.
 
 \begin{table}[H]
 \centering
@@ -1487,21 +2068,53 @@ Level & Neurons & \% & optic & sensory & central & descending & vis.\ proj. \\
 \midrule
 L1 & 13,601 & 10.1 & 51.7 & \textbf{42.3} & 3.9 & 0.0 & 0.6 \\
 L2 & 47,049 & 35.1 & 75.6 & 8.6 & 11.6 & 0.1 & 2.3 \\
-L3 & 44,265 & 33.0 & 67.7 & 3.2 & 21.3 & 0.3 & 6.1 \\
-L4 & 17,124 & 12.8 & 26.9 & 4.9 & 48.1 & 1.4 & 16.3 \\
-L5 & 12,142 &  9.0 &  3.3 & 5.5 & \textbf{72.0} & \textbf{7.0} & 8.4 \\
+L3 & 44,265 & 33.0 & 67.6 & 3.2 & 21.3 & 0.3 & 6.1 \\
+L4 & 17,124 & 12.8 & 26.9 & 4.9 & 48.0 & 1.4 & 16.3 \\
+L5 & 12,142 &  9.0 &  3.2 & 5.5 & \textbf{71.3} & \textbf{6.9} & 8.3 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{level_composition.png}
+\caption[Level sizes and functional composition]{The five levels by size and
+by content. On the left, how many neurons each level holds; on the right, the
+same populations normalised, so that the composition can be compared across
+levels of very different size. The super-classes are stacked in
+sensory-to-motor order, and the resulting picture is a gradient: sensory and
+optic neurons fill the shallow levels, central neurons take over from
+level~4, and descending neurons, which carry signals out of the brain towards
+the motor system, appear in quantity only at level~5.}
+\label{fig:level-composition}
+\end{figure}
+
 The gradient is monotone in the expected direction. Sensory content falls
 from $42.3\%$ at level~1 to $5.5\%$ at level~5, central content rises from
-$3.9\%$ to $72.0\%$ over the same range, and descending neurons, which carry
-signals out of the brain towards the motor system, appear only at the two
-deepest levels. None of this was imposed by the level assignment procedure,
-which did not use the super-class labels, so the agreement constitutes
-independent confirmation that the hierarchy captures a genuine
-sensory-to-motor axis rather than an arbitrary partition of the neurons.
+$3.9\%$ to $71.3\%$ over the same range, and descending neurons appear only
+at the two deepest levels.
+
+How much this confirms requires care, because the level boundaries were
+themselves chosen to separate super-classes, as
+Section~\ref{sec:levels} described. Reading the gradient as independent
+confirmation of the levels would therefore be circular, and it is not
+claimed here. What the gradient does confirm is something else, and it is
+worth separating the two.
+
+The construction has two stages, and only the second one saw the super-class
+labels. The spectral embedding that produces the flow score is computed from
+connectivity alone: it knows which neuron projects to which, and nothing
+about what any of them does. The decision tree then chose four numbers on
+that one-dimensional axis. Four thresholds are very little freedom, and no
+choice of them could have produced the gradient of
+Figure~\ref{fig:level-composition} if the underlying axis had not already
+ordered the neurons that way. The alignment is therefore evidence about the
+\emph{embedding}, not about the discretisation: a quantity derived purely
+from wiring turns out to sort neurons into the same order that their
+biological function does. That is a genuine result, and it is the reason the
+levels can be trusted as an axis of information flow. What it is not is a
+validation of where exactly the four cuts fall, which remains a modelling
+choice inherited from earlier work.
 
 \subsubsection{Connection Density}
 
@@ -1533,8 +2146,8 @@ throughout the results and explains several of them.
 \subsubsection{Edge Direction}
 
 Classifying every edge of the connectome by
-Equation~\eqref{eq:edge-direction} gives $1{,}169{,}787$ feed-forward edges,
-$1{,}054{,}005$ lateral edges and $476{,}721$ feedback edges. Almost $39\%$
+Equation~\eqref{eq:edge-direction} gives $1{,}169{,}787$ forward edges,
+$1{,}054{,}005$ lateral edges and $476{,}721$ backward edges. Almost $39\%$
 of all connections are therefore lateral, running between neurons of the
 same hierarchical level. This has an immediate methodological consequence:
 any routing scheme that discards lateral edges is discarding a very
@@ -1644,9 +2257,13 @@ track it at all. The layering is therefore not merely transferable from
 super-classes to groups; groups are the categorisation on which it is
 sharpest.
 
+% [H] e non [t]: come float verrebbe rimandata in fondo al documento, vedi
+% la nota sulla figura delle firme. La larghezza e' 0.88 e non 1 perche' a
+% piena larghezza mancava un centimetro per stare nella pagina in corso, e
+% la pagina restava vuota per due terzi.
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{level_coherence.png}
+\includegraphics[width=0.88\textwidth]{level_coherence.png}
 \caption[Coherence between anatomical group and level]{How anatomical
 categories distribute over the hierarchical levels. On the left, the level
 profile of the twenty largest anatomical groups, each row normalised to its
@@ -1665,11 +2282,16 @@ labels it was calibrated on.}
 One caveat should be recorded. All three quantities are computed on the
 levels as given, and none of them validates the level construction itself;
 they establish only that the construction is at least as compatible with the
-anatomical group as with the categorisation used to build it. A genuinely
-independent check on the hierarchy comes from a different direction, in
-Section~\ref{sec:results-hierarchy}, where the functional composition of the
-levels is shown to follow the expected sensory-to-motor gradient without that
-gradient having been imposed.
+anatomical group as with the categorisation used to build it.
+
+Nor does the functional gradient of Section~\ref{sec:results-hierarchy}
+supply the missing validation, for the reason given there: the level
+boundaries were chosen to separate super-classes, so finding that the levels
+separate super-classes is not an independent test. What that gradient does
+support is the \emph{spectral embedding} underlying the levels, since four
+thresholds on a fixed axis could not have produced it had the axis not
+already carried the ordering. The discretisation itself remains a modelling
+choice inherited from earlier work, and no result in this thesis tests it.
 
 \subsection{The Macro-Scale Hourglass}
 \label{sec:results-macro}
@@ -1764,8 +2386,10 @@ than a remark.
 A plausible one, offered here as an argument to be weighed rather than as a
 demonstrated result, is that the two nervous systems are solving different
 problems. \textit{C.\ elegans} routes essentially all of its sensory
-information through ten to fifteen command interneurons, which constitutes a
-single shared bottleneck for the whole animal. The fly processes several
+information through ten to fifteen command interneurons, an interneuron being
+a neuron that sits between others rather than receiving from a sense organ or
+driving a muscle; those few cells constitute a single shared bottleneck for
+the whole animal. The fly processes several
 sensory modalities in parallel, and each of them plausibly has its own
 bottleneck rather than sharing one. The composition of the $\tau$-core
 supports this reading, since it separates into distinct clusters, with
@@ -1778,6 +2402,17 @@ small cores is larger than any one of them.
 
 \subsection{Bow-Tie Motifs Across Level Windows}
 \label{sec:results-windows}
+
+
+This section reports the exhaustive motif search. It covers the four level
+windows and what changes between them, the decomposition of the patterns by
+directional signature, and the distribution of the mass across chains of
+levels, which is what locates the waist within the hierarchy.
+
+The organising finding is that the architecture is not uniform with depth.
+The shallow and the deep brain differ not in how many patterns they contain
+but in what kind, and the difference is large enough that reporting a single
+window would have given a misleading picture of the connectome.
 
 \subsubsection{The Four Windows}
 
@@ -1834,18 +2469,12 @@ any loss of exactness.
 \subsubsection{Directional Signatures}
 \label{sec:results-signature}
 
-The coarse four-way classification turns out to be nearly vacuous. On the
-shallow window, \emph{mixed} accounts for $29{,}453{,}022$ patterns, which
-is $94.4\%$ of the total, while \emph{pure\_LAT} accounts for
-$1{,}651{,}892$ ($5.3\%$), \emph{pure\_FWD} for $57{,}821$ ($0.19\%$) and
-\emph{pure\_BWD} for only $22{,}065$ ($0.07\%$). This is not a surprising
-finding so much as an arithmetic one: with four edges each independently
-able to run in three directions, complete agreement among all four is simply
-improbable, and the coarse label therefore carries very little information.
-
-The sixteen-signature decomposition of Equation~\eqref{eq:signature}
-resolves the \emph{mixed} bucket into thirteen distinct classes whose
-behaviour differs considerably, as Figure~\ref{fig:signature-distrib} shows.
+Section~\ref{sec:motifs} set out why the motifs are classified by the
+signature of Equation~\eqref{eq:signature} rather than by the agreement of
+all four edges at once. What that section could not show is how the thirteen
+classes hidden inside the coarse \emph{mixed} label actually behave, and they
+turn out to differ considerably, as Figure~\ref{fig:signature-distrib}
+shows.
 
 \begin{figure}[H]
 \centering
@@ -1873,7 +2502,12 @@ a fixed property of the connectome but changes substantially with depth.
 \begin{table}[H]
 \centering
 \caption{Share of total motif mass by directional signature, shallow versus
-deep window.}
+deep window. The upper block lists every signature in which at least one
+branch is entirely lateral, that is, in which \emph{both} edges entering the
+waist, or \emph{both} edges leaving it, run within a single level; the lower
+block gives the two largest signatures without such a branch. The seven
+signatures omitted from the table carry $10.2\%$ of the shallow mass and
+$2.1\%$ of the deep mass between them.}
 \label{tab:signatures}
 \begin{tabular}{lrr}
 \toprule
@@ -1881,19 +2515,28 @@ Signature & $\{1,2,3\}$ (\% mass) & $\{3,4,5\}$ (\% mass) \\
 \midrule
 \code{LAT->mix}  &  9.2 & \textbf{42.7} \\
 \code{mix->LAT}  & 10.3 & \textbf{23.3} \\
+\code{FWD->LAT} & 11.9 &  0.4 \\
 \code{LAT->LAT}  &  0.6 & \textbf{10.2} \\
-\code{mix->mix}  & \textbf{38.5} & 13.9 \\
-\code{FWD->mix}   & 13.3 &  1.5 \\
+\code{LAT->BWD} &  6.0 &  0.2 \\
+\code{LAT->FWD} &  0.0 &  3.7 \\
+\code{BWD->LAT} &  0.0 &  2.1 \\
 \midrule
-\emph{any purely lateral branch} & \emph{20.1} & \textbf{\emph{76.2}} \\
+\emph{all seven of the above} & \emph{38.0} & \textbf{\emph{82.6}} \\
+\midrule
+\code{mix->mix}  & \textbf{38.5} & 13.9 \\
+\code{FWD->mix}  & 13.3 &  1.5 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Signatures containing at least one purely lateral branch carry $20.1\%$ of
-the mass in the shallow window and $76.2\%$ in the deep one, while
+Signatures containing at least one purely lateral branch carry $38.0\%$ of
+the mass in the shallow window and $82.6\%$ in the deep one, while
 \code{mix->mix}, which dominates the shallow window at $38.5\%$, falls to
-$13.9\%$. Figure~\ref{fig:signature-shift} displays the same comparison
+$13.9\%$. What changes with depth is not only how much of the mass is
+lateral but which kind: in the shallow window the lateral branch is usually
+paired with a forward or backward one, as in \code{FWD->LAT} at $11.9\%$,
+whereas in the deep window it is almost always paired with a mixed branch or
+with another lateral one. Figure~\ref{fig:signature-shift} displays the same comparison
 signature by signature, sorted by the magnitude of the shift. The deep brain
 is, in this precise sense, laterally dominated: its characteristic circuit
 is one in which information enters or leaves a waist by moving sideways
@@ -2006,8 +2649,26 @@ mass.}
 \label{fig:level-chains}
 \end{figure}
 
-The waist sits at level~3 in roughly ninety per cent of the mass, which is
-worth pausing on. Level~5 is the most internally dense level of the entire
+The waist sits at level~3 in roughly ninety per cent of the mass. That the
+bottleneck is in the middle of the hierarchy is the expected outcome rather
+than a surprising one, and it is worth saying why before drawing anything
+further from the table.
+
+A bow-tie requires convergence on its way in and divergence on its way out.
+Neither is available at the ends of the hierarchy. Level~1 is dominated by
+sensory neurons, which receive almost nothing from inside the brain and so
+cannot be converged upon; level~5 is dominated by descending and motor
+neurons, which project out of the brain and so have little to diverge into
+within it. The middle is the only place where a neuron has both a substantial
+input from within the network and a substantial output back into it, and it
+is also, for the same reason, where the processing happens. Finding the waist
+there therefore does not so much reveal something unexpected about the
+connectome as confirm that the measure is picking up processing structure
+rather than an artefact of how the levels were drawn. It is the result one
+would want to see before trusting anything else the search reports.
+
+What is not automatic is which of the middle levels it turns out to be, and
+how sharply. Level~5 is the most internally dense level of the entire
 connectome, as Section~\ref{sec:results-hierarchy} established, and yet it
 barely appears as a waist at all. High internal density combined with very
 few bottlenecks is a specific structural signature: it indicates connectivity
@@ -2042,9 +2703,10 @@ L3 $\to$ L3 $\to$ L3 & 19.9\% \\
 \end{tabular}
 \end{table}
 
-All four have their waist at level~3, which is the same concentration
-observed independently in the deep window and therefore not a peculiarity of
-either.
+All four have their waist at level~3, the same concentration observed
+independently in the deep window and therefore not a peculiarity of either.
+Two windows sharing only one level agree on where the bottleneck sits, which
+is a stronger statement than either window makes alone.
 
 The table also answers directly a question that motivated this part of the
 analysis, namely how many bow-tie patterns run from level~1 into level~2.
@@ -2064,7 +2726,7 @@ structures must be the most important ones.
 Section~\ref{sec:groups} argued for grouping neurons by anatomical group
 rather than by functional super-class or by super-region. Since that choice
 conditions every result in this chapter, and since the coarsest of the three
-is the one adopted in the related work of Section~\ref{sec:related}, the
+is the one adopted in the previous work of Section~\ref{sec:related}, the
 entire search was repeated at both of the other granularities on the shallow
 window, so that the comparison could be made on results rather than in the
 abstract. The three runs differ only in the map from neurons to categories;
@@ -2264,7 +2926,7 @@ leading pattern has two medulla groups converging onto the lobula which then
 projects onto two lobula plate groups. The relay form, \code{BWD->FWD},
 comprises a very similar number of patterns, $822{,}466$, but carries nine
 times less mass, and it sits on a different structure altogether: the lobula
-plate, \code{LOP\_L2}, in $93.2\%$ of its mass. Pure feedback,
+plate, \code{LOP\_L2}, in $93.2\%$ of its mass. The purely backward form,
 \code{BWD->BWD}, is negligible in mass and also lives on \code{LOP\_L2}.
 
 The two forms of recurrence are therefore anatomically separated rather than
@@ -2330,12 +2992,12 @@ when anatomy is preserved and the degree alignment destroyed. The signature
 \code{LAT->LAT} moves in the opposite direction by more than two orders of
 magnitude.
 
-The interpretation is straightforward once stated. Purely feed-forward
-bow-ties are rare given the degree sequence alone, so a null model that
-ignores anatomy finds them strikingly over-represented in the real network;
-but once the regional block structure is preserved, they turn out to be
-close to what that structure already implies, because the anatomy itself is
-broadly feed-forward. Lateral bow-ties behave in exactly the opposite way:
+The interpretation is straightforward once stated. Purely forward bow-ties
+are rare given the degree sequence alone, so a null model that ignores
+anatomy finds them strikingly over-represented in the real network; but once
+the regional block structure is preserved, they turn out to be close to what
+that structure already implies, because the anatomy itself runs broadly
+forward. Lateral bow-ties behave in exactly the opposite way:
 unremarkable given the degrees, strongly over-represented given the anatomy.
 
 This is the strongest argument this thesis can offer for using several null
@@ -2348,7 +3010,11 @@ indicate that anything was amiss.
 \label{sec:results-bridge}
 
 Comparing the two scales on the six hundred and sixty groups of the shallow
-window gives a Spearman rank correlation of $\rho = +0.121$ with
+window gives a Spearman rank correlation of $\rho = +0.121$. The Spearman
+coefficient compares the two orderings rather than the two sets of values,
+which is what is wanted here, since the motif mass and the path coverage are
+measured on scales that are not comparable and the question is only whether
+a group ranking high on one tends to rank high on the other. Its value is with
 $p = 0.0018$ between the motif mass of a group acting as a waist and its
 coverage in the $\tau$-core. A rank correlation was used rather than a
 linear one because both quantities span several orders of magnitude and
@@ -2380,17 +3046,20 @@ olfactory pathway, with ranks out of six hundred and sixty groups.}
 \toprule
 Group & Micro rank (motif mass) & Macro rank (coverage) \\
 \midrule
-\code{AL.MB\_CA} L2 &  8 & 12 \\
-\code{AL.LH} L2     & 10 &  2 \\
-\code{AL} L2        & 20 &  4 \\
-\code{AL.PLP} L2    & 50 &  8 \\
+\code{AL.MB\_CA\_L2} &  8 & 12 \\
+\code{AL.LH\_L2}     & 10 &  2 \\
+\code{AL\_L2}        & 20 &  4 \\
+\code{AL.PLP\_L2}    & 50 &  8 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The overlap between the two top-twenty lists is three groups out of twenty,
-against $0.61$ expected by chance under a hypergeometric model, giving
-$p = 0.0195$. That agreement is modest in absolute terms but is
+The overlap between the two top-twenty lists is three groups out of twenty.
+Two lists of twenty drawn at random from six hundred and sixty would be
+expected to share $0.61$ groups, a figure given by the hypergeometric
+distribution, which describes how many elements two subsets of fixed size
+share when drawn without replacement from the same population; observing
+three gives $p = 0.0195$. That agreement is modest in absolute terms but is
 concentrated on structures of known functional importance, which makes it
 more meaningful than the raw number suggests.
 
@@ -2412,8 +3081,23 @@ expected outcome rather than a failure of replication, since the
 $\tau$-core is dominated by olfactory and gustatory pathways which reside at
 levels one to three and are therefore largely outside the deep window.
 
-\subsection{Neurotransmitters: A Negative Result}
+\subsection{Neurotransmitters: A Hypothesis and Its Scope}
 \label{sec:results-nt}
+
+
+The waists identified so far are structural objects, and a natural question
+is whether they are also chemically distinct: whether the waists of backward
+circuits, in particular, are more inhibitory than those of forward ones. The
+hypothesis is plausible, since inhibition is commonly associated with
+feedback control, and the data needed to test it are available, because
+FlyWire predicts a neurotransmitter for every neuron, under the
+classification set out in Section~\ref{sec:dataset}.
+
+This section reports what came of it. Part of the answer is robust and is
+stated first; the central comparison holds on one window and not on the
+others, and the reason for the discrepancy is identified rather than left
+open; and what survives is a narrower claim about one brain region, together
+with the procedure that separated it from the broader one.
 
 \subsubsection{What Holds}
 
@@ -2427,18 +3111,18 @@ group, and not on any comparison between classes of motif, which is why it
 survives the difficulties described below.
 
 Figure~\ref{fig:nt-direction} shows the related and also robust observation
-that feed-forward edges are more excitatory than feedback ones. That
-difference, however, is almost entirely attributable to the medulla, whose
-edges dominate the feed-forward class, and it is a statement about edges
-rather than about waists.
+that forward edges are more excitatory than backward ones. That difference,
+however, is almost entirely attributable to the medulla, whose edges
+dominate the forward class, and it is a statement about edges rather than
+about waists.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.86\textwidth]{nt_by_direction.png}
 \caption[E/I composition by edge direction]{Excitatory and inhibitory
-composition of edges by direction. Feed-forward edges are more excitatory
-than feedback ones, but the difference is almost entirely attributable to
-the medulla. This figure concerns edges; the waist-level comparison that
+composition of edges by direction. Forward edges are more excitatory than
+backward ones, but the difference is almost entirely attributable to the
+medulla. This figure concerns edges; the waist-level comparison that
 follows, which is the hypothesis actually under test, does not survive
 replication.}
 \label{fig:nt-direction}
@@ -2446,15 +3130,24 @@ replication.}
 
 \subsubsection{What Does Not}
 
-The hypothesis under test was that the waists of feedback bow-ties differ
-neurochemically from those of feed-forward bow-ties. The natural way to test
+The hypothesis under test was that the waists of backward bow-ties differ
+neurochemically from those of forward bow-ties. The natural way to test
 it is to compare, for each waist group that hosts motifs of both kinds, the
 excitatory fraction of that group as it appears in the two classes; working
 at parity of waist in this way controls for the regional composition that
 Section~\ref{sec:problem} identified as the principal confound.
 
-On the shallow window the effect appears clear, with a gap of $+0.117$ at
-$p = 0.0033$. Extending the same comparison to all four windows produces
+Because each waist contributes one value to each class, the two samples are
+paired rather than independent, and the comparison is made with the Wilcoxon
+signed-rank test: the differences within each pair are ranked by magnitude
+and the ranks of the positive and negative differences are compared. The
+test is used rather than a paired $t$-test because the excitatory fractions
+are proportions bounded in $[0,1]$ and far from normally distributed, with
+many waists entirely excitatory or entirely inhibitory. Every $p$-value
+reported in this section comes from that test.
+
+On the shallow window the effect appears clear, with a gap of $+0.122$ at
+$p = 0.0034$. Extending the same comparison to all four windows produces
 Table~\ref{tab:nt} and Figure~\ref{fig:nt-windows}.
 
 \begin{table}[H]
@@ -2466,7 +3159,7 @@ Table~\ref{tab:nt} and Figure~\ref{fig:nt-windows}.
 \toprule
 Window & Shared waists & \emph{pure\_BWD} & \emph{pure\_FWD} & Gap at parity & $p$ \\
 \midrule
-$\{1,2,3\}$     &  86 & 0.393 & 0.511 & $+0.117$ & 0.0033 \\
+$\{1,2,3\}$     &  86 & 0.387 & 0.508 & $+0.122$ & 0.0034 \\
 $\{3,4,5\}$     & 221 & 0.501 & 0.547 & $+0.046$ & 0.0098 \\
 $\{2,3,4\}$     & 185 & \textbf{0.506} & \textbf{0.449} & $\mathbf{-0.057}$ & 0.0296 \\
 $\{1,2,3,4,5\}$ & \textbf{492} & 0.483 & 0.504 & $+0.021$ & \textbf{0.098} \\
@@ -2488,7 +3181,7 @@ the rest, does not reach significance.}
 
 Three observations together dismantle the conclusion. On window
 $\{2,3,4\}$ the sign of the effect reverses, with a $p$-value that would
-conventionally be called significant: there, feedback waists are
+conventionally be called significant: there, backward waists are
 \emph{more} excitatory rather than less. On the full window, which has the
 largest number of shared waists and which subsumes all the others, the
 effect does not reach significance at all. And the raw gaps on those two
@@ -2505,8 +3198,8 @@ shallow window the \emph{pure\_FWD} motifs concentrate in
 The apparent difference between motif classes is thus a difference between
 brain regions wearing the costume of a difference between circuit types.
 
-The control at parity of waist did substantial work: it removed $84\%$ of
-the raw gap on that window, taking it from $+0.726$ down to $+0.117$. What
+The control at parity of waist did substantial work: it removed $83\%$ of
+the raw gap on that window, taking it from $+0.726$ down to $+0.122$. What
 it did not do was remove all of it, and the residue looked like a genuine
 effect. In hindsight the residue was the remaining part of the same
 regional artefact, not an independent phenomenon, and the way this became
@@ -2516,38 +3209,77 @@ It is also worth noting the multiple-testing situation. Across four windows
 and six pairwise comparisons there are twenty-four tests in total, so
 roughly one false positive is expected at a nominal $\alpha = 0.05$. None of
 the four $p$-values in Table~\ref{tab:nt} survives a Bonferroni correction
-within its own window, where the threshold would be $0.0083$, except the one
-obtained on the shallow window.
+within its own window, except the one obtained on the shallow window. The
+Bonferroni correction is the most conservative way of accounting for
+multiple tests: it divides the significance threshold by the number of tests
+performed, so with six comparisons per window the level required drops from
+$0.05$ to $0.0083$.
 
-\subsubsection{How This Should Be Read}
+\subsubsection{What the Analysis Establishes}
 
-This is an analysis with a negative outcome: the hypothesis does not hold on
-the full connectome. It remains a contribution for two reasons. It excludes
-a plausible hypothesis that would otherwise remain open, and the
-methodology that exposed the false positive is reusable. That methodology
-consists of controlling at parity of waist, decomposing the raw gap to see
-how much of it the control removes, and then replicating across independent
-subsets of the data. The last of these was decisive: two concordant windows
-are not a replication but two draws, and it was only the third and fourth
-windows that settled the question.
+Three things come out of this, and they should be kept apart.
+
+The first is a claim that holds. Within the medulla, forward connections are
+excitatory in $68.8\%$ of cases and backward ones in only $34.8\%$. This is
+measured at parity of region, so it is not a composition effect, and it is
+biologically unsurprising: the medulla contains the motion-detection
+circuitry, in which lateral and feedback inhibition are the expected
+mechanism. This is the version of the hypothesis that the data support.
+
+The second is a claim that does not hold, at least not on this evidence: that
+the same relation is a general property of the connectome. It is not
+supported outside the optic lobe, and the analysis says why rather than
+merely reporting that it failed. The two classes of motif are not spread
+evenly across the brain, so a comparison between them is partly a comparison
+between the regions they happen to occupy, and once that is controlled for
+most of the effect is gone.
+
+The third is a question left open. Whether some weaker version of the
+relation holds in the central brain, where the two classes of motif are too
+unevenly distributed for the present design to test it, is not settled here.
+Answering it needs a different design rather than more data: a set of waists
+selected in advance to carry both directions in comparable numbers, which
+this analysis, working from an exhaustive search rather than a targeted one,
+could not assemble. Section~\ref{sec:future} returns to this.
+
+The procedure itself is the part that transfers. It has three steps:
+control at parity of waist, decompose the raw gap to see how much of it the
+control removes, and replicate across independent subsets of the data. The
+last step was the decisive one, and its lesson is worth stating plainly. Two
+concordant windows are not a replication but two draws from overlapping
+data; it was only the third and fourth windows that made the scope of the
+claim visible.
 
 \subsection{Integrative, Broadcast and Mixed Networks}
 \label{sec:results-sweep}
 
+Everything so far has been counted with two inputs and two outputs, which
+makes every pattern symmetric by construction. That symmetry is a
+restriction on what can be seen, not a property of the connectome, and
+lifting it turns out to reveal something the symmetric search cannot: not
+just \emph{where} the bottlenecks are, but \emph{what kind of operation}
+each one performs.
+
 Allowing $\kin$ and $\kout$ to vary independently distinguishes three
-regimes. A circuit with many inputs and one output is \emph{integrative},
-gathering information from several sources into one channel; a circuit with
-one input and many outputs is a \emph{broadcast}, distributing one signal
-widely; and balanced configurations are mixed.
+regimes. A circuit with many inputs and one output is \emph{integrative}: it
+gathers information from several sources and compresses it into one channel,
+which is what a decision or a classification looks like structurally. A
+circuit with one input and many outputs is a \emph{broadcast}: it takes one
+signal and distributes it widely, which is what an expansion into a
+higher-dimensional representation looks like. Balanced configurations are
+mixed. The distinction is captured by an \emph{integration index}, negative
+for broadcast and positive for integration, and the question this section
+asks is whether the index, computed from wiring alone, recovers operations
+that are known independently from physiology.
 
 Enumeration is again avoided, this time by a different route. The sum over
 all $k$-combinations of a product of flow vectors is the elementary
 symmetric polynomial $e_k$ of those vectors, which can be evaluated in
 $O(p \cdot k)$ time per neuron for $p$ available groups without ever forming
 a single combination explicitly. The complete sweep for $k$ from two to five
-on the shallow window takes one hundred and eleven seconds, where explicit
-enumeration would have required forming $2.9$ million combinations for a
-single waist at $\kin = 3$.
+on the shallow window takes ninety-four seconds, where explicit enumeration
+would have required forming $2.9$ million combinations for a single waist at
+$\kin = 3$.
 
 One methodological caution applies to the resulting index, and it is
 instructive because the artefact is easy to miss. The raw integration index
@@ -2562,11 +3294,34 @@ here.
 
 \subsubsection{The Sweep Recovers the Mushroom Body Architecture}
 
-Across the four hundred and ninety-seven metanodes above threshold the
-classification yields one hundred and eighty-four integrative circuits, two
-hundred and fifteen mixed and ninety-eight broadcast. What makes this more
-than a tally is that the assignments trace a known anatomical pathway
-without having been given any information about it.
+The window contains eight hundred and fifty-three metanodes, of which seven
+hundred and five carry a total count of at least $10^3$ and are classified;
+the rest are too sparsely populated for the index to mean anything. Of those
+seven hundred and five, two hundred and forty-eight come out integrative,
+three hundred and seventeen mixed and one hundred and forty broadcast. A tally of that kind
+is not by itself informative: any classification of five hundred objects
+into three bins will produce numbers, and nothing in them says whether the
+bins mean anything.
+
+What makes the classification testable is that there exists a circuit whose
+answer is known in advance. The olfactory pathway of the mushroom body is
+among the best characterised in any brain, and its computational
+organisation has been established physiologically rather than structurally:
+a compact odour code carried by a few dozen projection neuron types is
+expanded onto a much larger population of Kenyon cells, and that expanded
+representation is then read out by a small number of output neurons whose
+activity drives behaviour. Expansion followed by compression is exactly the
+sequence broadcast $\rightarrow$ mixed $\rightarrow$ integrative would
+describe, so the pathway constitutes a prediction the index either meets or
+fails.
+
+Table~\ref{tab:mb-architecture} therefore reports the five metanodes lying
+along that pathway rather than the highest-scoring metanodes overall. The
+selection is made anatomically and before looking at the index: they are the
+waists corresponding to the antennal-lobe projection neurons, to the
+parallel projection into the lateral horn, to the Kenyon cells, and to the
+two mushroom body output populations. Reporting the extremes of the ranking
+instead would have shown only that the index has extremes.
 
 \begin{table}[H]
 \centering
@@ -2586,15 +3341,65 @@ Waist & in / out & Index & Regime \\
 \end{tabular}
 \end{table}
 
-The sequence in that table is the textbook description of the mushroom body.
-Olfactory projection neurons broadcast onto a much larger population of
-Kenyon cells, which expands a compact odour representation into a sparse
-high-dimensional one; the Kenyon cells themselves operate in a mixed regime;
-and the mushroom body output neurons integrate that expanded representation
-back down into a small number of channels that drive behaviour. The analysis
-is purely structural and was not seeded with any anatomical knowledge, so
-recovering this organisation is best understood as a validation of the index
-rather than as a new biological claim.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{olfactory_pathway.png}
+\caption[The olfactory pathway recovered by the integration index]{The
+olfactory pathway of the mushroom body, drawn so that the width of each
+stage reflects the operation the index attributes to it. Odour information
+arrives from the antennal lobe, is distributed by a small population of
+projection neurons onto a much larger one of Kenyon cells, and is then read
+out by a small population of output neurons. The integration index beneath
+each stage is computed from connectivity alone, with no anatomical
+information supplied: it comes out strongly negative where the circuit
+expands, near zero where it is maintained, and at the extreme of positive
+where it compresses. The values are those of
+Table~\ref{tab:mb-architecture}.}
+\label{fig:olfactory}
+\end{figure}
+
+The prediction is met, and in order, as Figure~\ref{fig:olfactory} shows.
+The two entries at the top of the
+table, the projection neurons and the parallel pathway into the lateral
+horn, come out strongly negative at $-0.895$ and $-0.712$: they are
+broadcasts, distributing a compact odour representation outwards. The Kenyon
+cells sit almost exactly at the boundary, $+0.061$, which is the mixed
+regime: they receive the expansion and pass it on without yet compressing
+it. The two output populations come out at $+0.997$ and $+1.000$, at the
+extreme of integration: they collapse the expanded representation back into
+a few channels. Read down the table, the index traces expansion, then
+maintenance, then compression, which is the textbook description of the
+circuit.
+
+Three things follow, and they are worth separating because they are claims
+of different strength.
+
+The first concerns the index rather than the biology. The ordering was
+recovered from connectivity alone, with no anatomical or physiological
+information supplied at any stage, and with the selection of rows fixed in
+advance. That is what makes it a test: the index could have come out flat,
+or in the wrong order, and it did not. This is the strongest of the three
+statements and it is a validation of the method.
+
+The second concerns what the index adds to the rest of the thesis. The
+symmetric search of Section~\ref{sec:results-windows} identifies
+\code{MB\_CA.MB\_ML} and the mushroom body waists as high-count structures,
+but it describes them all the same way, since with $\kin = \kout = 2$ every
+pattern is symmetric by construction. The sweep separates them: the
+projection neurons and the output neurons are both bottlenecks, and both
+carry a great deal of mass, and yet they are performing opposite operations.
+The direction of the asymmetry is information the fixed-shape search
+discards, and recovering it costs ninety-four seconds.
+
+The third is a caution about scope. The mushroom body is the case where the
+answer was known, which is precisely why it was used, and a method validated
+on one circuit has not thereby been validated on all of them. The remaining
+seven hundred metanodes carry index values too, and nothing here establishes
+that those values are equally meaningful. What the mushroom
+body licenses is the weaker and still useful claim that the index is capable
+of recovering a real computational organisation when one is present, which
+makes it worth applying elsewhere and worth checking against physiology
+wherever such a check is available.
 
 \subsection{Within-Area Characterisation}
 \label{sec:results-within}
@@ -2665,7 +3470,8 @@ motifs in the \code{LAT->LAT} class, with its neurons spread across several
 levels rather than concentrated in one, and it is the only genuinely
 informative lateral case in the dataset. It corresponds to the network of
 local interneurons that performs lateral inhibition between olfactory
-glomeruli, which is a well-established circuit recovered here independently
+glomeruli, the spherical compartments of the antennal lobe in which the
+receptors for a single odorant type converge, which is a well-established circuit recovered here independently
 and not explicable by level concentration. The optic lobe shows the
 re-entrant medulla pattern at $57.3\%$ and the lobula plate relay at
 $40.9\%$, consistent with Section~\ref{sec:optic-recurrence} and reached by
@@ -2747,28 +3553,37 @@ property is present, with a score of $0.498$ under structural routing, but
 it depends on the routing scheme and is markedly weaker than in
 \textit{C.\ elegans}, plausibly because the fly maintains several parallel
 modality-specific bottlenecks rather than one shared one. The deep brain is
-laterally dominated, with purely lateral branches carrying $76.2\%$ of the
-motif mass against $20.1\%$ in the shallow brain. The deepest level of the
+laterally dominated, with purely lateral branches carrying $82.6\%$ of the
+motif mass against $38.0\%$ in the shallow brain. The deepest level of the
 hierarchy is the most internally dense and yet marginal as a waist, a
 combination that points to recurrent rather than convergent organisation.
 And the two scales of analysis agree on the mid-hierarchy olfactory waists
 while diverging interpretably on input groups.
 
-The methodological contribution is the negative result together with the
-procedure that established it. An apparent neurochemical difference between
-feedback and feed-forward waists did not survive replication across
-independent level windows and was traced to regional composition. The
-related finding that the ranking between signatures inverts between null
-models makes the same point from a different direction: single-null analyses
-of this kind can be confidently wrong.
+The methodological contribution is the way an initially broad hypothesis was
+narrowed to the claim the data actually support. An apparent neurochemical
+difference between backward and forward waists held on the shallow window,
+did not replicate on the others, and was traced to the regions the two
+classes of motif occupy; what remains is a specific and defensible statement
+about the medulla, and an open question about the central brain that needs a
+targeted design to answer. The related finding that the ranking between
+signatures inverts between null models makes the same point from a different
+direction: single-null analyses of this kind can be confidently wrong.
 
 \subsection{Limitations}
 
 The hierarchical decomposition on which everything else rests is inherited
-from earlier work rather than derived here. It is validated independently in
-Section~\ref{sec:results-hierarchy}, where its functional composition
-follows the expected sensory-to-motor gradient, but any result conditioned
-on levels inherits whatever assumptions went into producing them.
+from earlier work rather than derived here, and it is only partly tested.
+The functional gradient of Section~\ref{sec:results-hierarchy} supports the
+spectral embedding that produces the underlying axis, but it cannot validate
+the four thresholds placed on that axis, because those thresholds were
+themselves chosen to separate the super-classes whose gradient is then
+observed. Section~\ref{sec:results-coherence} establishes that the levels
+are at least as compatible with the anatomical grouping used here as with
+the one they were built for, which addresses a different concern. Where the
+boundaries fall therefore remains an untested inheritance, and any result
+conditioned on levels carries whatever assumptions went into producing
+them.
 
 The hourglass score depends on the routing scheme, taking values between
 $0.247$ and $0.498$ depending on the scheme and the path-length bound. No
@@ -2834,6 +3649,7 @@ analysis can establish is which circuits exist and in what abundance; what
 they do remains a question for physiology.
 
 \subsection{Future Directions}
+\label{sec:future}
 
 The most immediate extension is to carry the remaining analyses through to
 the deep windows. Realised compression and statistical validation were
@@ -2841,6 +3657,16 @@ conducted in depth only on the shallow window, which is the least rich of
 the four with thirty-one million motifs against four hundred and thirty-four
 million, and there is no methodological obstacle to repeating them now that
 the search is fast enough.
+
+The open question left by Section~\ref{sec:results-nt} calls for a targeted
+design rather than more data. Testing whether backward waists are more
+inhibitory than forward ones in the central brain requires a set of waists
+chosen in advance to carry both directions in comparable numbers, since the
+present comparison is confounded by the regions the two classes of motif
+happen to occupy. An exhaustive search cannot assemble such a set, because it
+takes the waists the connectome provides; a targeted search over waists
+pre-selected for balance could, and would settle whether the medulla result
+generalises or is specific to motion-detection circuitry.
 
 The behaviour of level~5 deserves separate investigation. It is the most
 internally dense level of the connectome and yet marginal as a waist, and
@@ -2889,10 +3715,10 @@ L.~P. Cordella, P.~Foggia, C.~Sansone, and M.~Vento.
   Intelligence}, 26(10):1367--1372, 2004.
 
 \bibitem{corradini2025}
-% TODO: complete this reference from the source cited in related work.
-Corradini et al.
-\newblock Motif analysis of the \emph{Drosophila} connectome.
-\newblock 2025.
+E.~Corradini, F.~Parlapiano, A.~Ronci, G.~Terracina, and D.~Ursino.
+\newblock A complex network-based approach to detect and investigate
+  connectome motifs in the larval \emph{Drosophila}.
+\newblock \emph{Computers in Biology and Medicine}, 192, 2025.
 
 \bibitem{curcio2026}
 D.~Curcio.
@@ -2910,7 +3736,7 @@ K.~Ito et al.
 A.~Lin et al.
 \newblock Network statistics of the whole-brain connectome of
   \emph{Drosophila}.
-\newblock \emph{Nature}, 2024.
+\newblock \emph{Nature}, 634(8032):153--165, 2024.
 
 \bibitem{maslov2002}
 S.~Maslov and K.~Sneppen.

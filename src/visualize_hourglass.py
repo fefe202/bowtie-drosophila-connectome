@@ -292,7 +292,9 @@ def level_bands(ax, levels, x0, x1, label=True):
                    edgecolor="none")
         ax.axhline(y - 0.5, color="#e2e2e2", lw=0.6, zorder=0)
         if label:
-            ax.text(x0 - 0.30, y, f"L{lv}", fontsize=7.5,
+            # i nodi d'ingresso arrivano fino a x0 - 0.31: piu' vicino di
+            # cosi' l'etichetta finisce sotto il nodo piu' a sinistra
+            ax.text(x0 - 0.62, y, f"L{lv}", fontsize=7.5,
                     color="#777777", ha="right", va="center", zorder=2)
     ax.axhline(-max(levels) - 0.5, color="#e2e2e2", lw=0.6, zorder=0)
 
@@ -367,7 +369,7 @@ def draw_motif_panel(ax, row, macro_to_color, levels, show_level_labels=True):
     for p, a in zip(p_out, out_areas):
         node(p, a)
 
-    ax.set_xlim(X_IN - 0.72, X_OUT + 0.62)
+    ax.set_xlim(X_IN - 1.02, X_OUT + 0.62)
     ax.set_ylim(-max(levels) - 0.62, -min(levels) + 0.62)
     ax.set_axis_off()
 
@@ -463,12 +465,28 @@ def main():
                         help="Number of top hourglass to visualize (single mode)")
     parser.add_argument("--outdir", default=results("figures"),
                         help="Output directory")
+    parser.add_argument("--signature", default=None,
+                        help="tiene solo una firma, es. FWD->BWD; il nome "
+                             "si da' nella notazione nuova anche se il CSV "
+                             "porta ancora quella vecchia")
 
     args = parser.parse_args()
 
     df = normalize_directions(pd.read_csv(args.input))
     if 'signature' not in df.columns and 'bottleneck_level' in df.columns:
         add_signature(df, int(df['k_in'].iloc[0]), int(df['k_out'].iloc[0]))
+    if args.signature:
+        # il filtro va dopo la normalizzazione: cosi' si scrive FWD->BWD
+        # anche sui distillati vecchi, che dentro hanno ancora FF->FB
+        prima = len(df)
+        df = df[df['signature'] == args.signature]
+        if not len(df):
+            viste = ', '.join(sorted(
+                normalize_directions(pd.read_csv(args.input))['signature']
+                .unique()))
+            parser.error("nessun pattern con firma %r fra %d righe.\n"
+                         "  firme presenti: %s" % (args.signature, prima,
+                                                   viste))
     df = df.sort_values(by='motif_count', ascending=False)
 
     macro_to_color = {}

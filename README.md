@@ -108,10 +108,42 @@ python src/motifs_within_area.py --min_neurons 200 --n_random 200 --seed 42
 python src/pattern_algebra.py --max_nodes 4 --n_verify 25
 python src/sweep_kin_kout.py --window 1-2-3 --kmax 5
 
+# the same search at the two coarser granularities
+python src/hourglass_areas_fast.py --window 1-2-3 --grouping superregion \
+    --dist_dir results/motif_distilled/1-2-3_superregion
+python src/hourglass_areas_fast.py --window 1-2-3 --grouping superclass \
+    --dist_dir results/motif_distilled/1-2-3_superclass
+
+# how well the hierarchical levels agree with the anatomical categories
+python src/level_coherence.py --figdir thesis/figures
+
 # figures
 python src/visualize_hourglass.py --input results/motif_distilled/3-4-5/top_globale.csv
 python src/make_summary_figures.py --lang en --outdir thesis/figures
 python src/make_thesis_figures.py --outdir thesis/figures
+python src/make_metagraph_figure.py --outdir thesis/figures
+python src/make_level_figures.py --outdir thesis/figures
+
+# the six conceptual figures: they read their numbers from the
+# results, so they cannot drift away from the text
+python src/make_concept_figures.py --outdir thesis/figures
+
+# check every figure quoted in the thesis against the data
+python src/check_thesis_numbers.py
+
+# the committed galleries under results/figures/. --signature takes the
+# name in the current FWD/BWD/LAT notation even though the distilled CSVs
+# still carry the older FF/FB/lat labels; they are translated on read
+python src/visualize_hourglass.py \
+    --input results/motif_distilled/1-2-3/top_per_firma.csv \
+    --signature "FWD->BWD" --mode single --top_n 4 \
+    --outdir results/figures/motif/FWD_to_BWD
+python src/visualize_hourglass.py \
+    --input results/motif_distilled/1-2-3/top_globale.csv \
+    --mode both --top_n 6 \
+    --outdir results/figures/motif/top_per_conteggio
+python src/make_summary_figures.py --lang it \
+    --outdir results/figures/sintesi
 ```
 
 ## Method
@@ -136,6 +168,20 @@ The boundary between the tractable and the intractable is therefore the presence
 
 `src/hourglass_areas.py` implements the formulation directly and serves as the correctness reference. `src/hourglass_areas_fast.py` is the production engine: it computes all combinations of a waist as a single matrix product delegated to BLAS, and switches to a sparse product where the dense form exceeds the memory budget.
 
+### Granularity
+
+Motifs are counted over *metanodes*, each a pair of an anatomical category and a hierarchical level. Three categorisations are available through `--grouping`, and the choice changes what a result can say:
+
+| granularity | categories | metanodes on 1-2-3 | median neurons | leading pattern |
+| :--- | ---: | ---: | ---: | :--- |
+| `superclass` | 9 | 24 | 511 | `central → visual_centrifugal → optic` |
+| `superregion` | 79 | 188 | 11 | `AL → AL.MB → MB`, the olfactory pathway |
+| `group` | 628 | 879 | 3 | `ME, ME.LO → LO → LO.LOP, ME.LOP` |
+
+The `group` field of the dataset is not an arbitrary list of 628 labels: it is built from 44 neuropils under the standard nomenclature, and every group is either one neuropil or a pair written with a dot, never more. `src/neuropil_taxonomy.py` holds the map from neuropils to the 13 super-regions that gives the intermediate scale.
+
+Results in the thesis use `group`, because the coarsest categorisation collapses 521 anatomical groups into `central` alone and cannot express any claim about routing within the central brain.
+
 ## Verification
 
 Every count is checked rather than assumed.
@@ -154,14 +200,14 @@ Each analysis also recomputes occurrence counts directly from the graph and comp
 ## Repository layout
 
 ```
-├── src/                  19 scripts, 6,722 lines
+├── src/                  25 scripts, 8,613 lines
 │   └── deprecated/       superseded scripts, kept for traceability
 ├── thesis/
 │   ├── thesis.tex        single-file LaTeX source, 60 pages
-│   └── figures/          the 19 figures of the thesis
+│   └── figures/          the 28 figures of the thesis
 ├── results/
 │   ├── motif_distilled/  committed: reproduces every table of the thesis
-│   └── figures/          committed: summary figures
+│   └── figures/          committed: motif galleries and summary figures
 ├── data/                 FlyWire tables, not committed
 ├── docs/                 working notes, not committed
 └── logs/                 run logs, not committed

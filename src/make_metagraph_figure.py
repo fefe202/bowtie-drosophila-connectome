@@ -147,8 +147,12 @@ def main():
     axR.axvline(np.median(gr.values), color="#4878a8", ls="--", lw=1.2)
     axR.axvline(np.median(sc.values), color="#c44e52", ls="--", lw=1.2)
     axR.legend(fontsize=8, loc="upper right")
-    axR.set_title("The two granularities differ by a factor of 35\n"
-                  "in the number of metanodes", fontsize=10, fontweight="bold")
+    # il fattore si ricava dai due conteggi: scritto a mano resterebbe
+    # fermo mentre i dati cambiano
+    fattore = len(gr) / float(len(sc))
+    axR.set_title("The two granularities differ by a factor of %.0f\n"
+                  "in the number of metanodes" % fattore,
+                  fontsize=10, fontweight="bold")
 
     os.makedirs(a.outdir, exist_ok=True)
     p = os.path.join(a.outdir, "metagraph.png")
