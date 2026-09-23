@@ -30,6 +30,13 @@ __pycache__/
 *.bbl
 *.blg
 
+# --- copie firmate della tesi -----------------------------------------------
+#  Contengono la firma autografa del relatore: in un repository pubblico non
+#  ci vanno. Il PDF non firmato, thesis/thesis.pdf, resta versionato.
+thesis/thesis_firma*.pdf
+thesis/*signed*.pdf
+thesis/*firmat*.pdf
+
 # --- residui ----------------------------------------------------------------
 *.bak
 *.tmp

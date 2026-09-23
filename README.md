@@ -4,7 +4,7 @@ Structural analysis of the adult *Drosophila melanogaster* connectome, asking wh
 
 The question is addressed at two independent scales. Locally, we exhaustively count bow-tie motifs in which `k_in` groups of neurons converge onto one *waist* group that projects onto `k_out` further groups. Globally, we compute the τ-core of the network and its hourglass score. Where the two agree the result is robust; where they disagree, the disagreement is itself informative.
 
-Master thesis, University of Calabria. The thesis source is in Remove-Item -Recurse -Force .git[`thesis/thesis.tex`](thesis/thesis.tex).
+Master thesis, University of Calabria. The thesis source is in [`thesis/thesis.tex`](thesis/thesis.tex).
 
 ---
 
@@ -144,6 +144,11 @@ python src/visualize_hourglass.py \
     --outdir results/figures/motif/top_per_conteggio
 python src/make_summary_figures.py --lang it \
     --outdir results/figures/sintesi
+
+# the defence slides: the figures are redrawn for projection, not reused
+# from the thesis at their reading size
+python src/make_slide_figures.py --outdir slides/figures
+python slides/build_slides.py
 ```
 
 ## Method
@@ -203,8 +208,11 @@ Each analysis also recomputes occurrence counts directly from the graph and comp
 ├── src/                  25 scripts, 8,613 lines
 │   └── deprecated/       superseded scripts, kept for traceability
 ├── thesis/
-│   ├── thesis.tex        single-file LaTeX source, 60 pages
+│   ├── thesis.tex        single-file LaTeX source, 90 pages
 │   └── figures/          the 28 figures of the thesis
+├── slides/                defence talk: 9 slides, script in the notes
+│   ├── build_slides.py   builds the .pptx from scratch
+│   └── figures/          redrawn for projection, not reused as-is
 ├── results/
 │   ├── motif_distilled/  committed: reproduces every table of the thesis
 │   └── figures/          committed: motif galleries and summary figures
